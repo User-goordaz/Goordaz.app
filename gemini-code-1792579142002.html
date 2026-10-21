@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="apple-touch-icon" href="logo.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Goordaz - Descubre, Pide y Disfruta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Grand+Hotel&family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <style>
+      body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #FFFDFB; }
+      .font-logo-script { font-family: 'Grand Hotel', cursive; }
+      .scrollbar-none::-webkit-scrollbar { display: none; }
+      .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+      .bg-brand-gradient { background: linear-gradient(135deg, #FF3B30 0%, #FF6B00 100%); }
+      .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+      @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  </style>
+
+  <script>
+      window.places = [
+          { 
+              id: 101, name: "La Sonata Restaurant & Karaoke", category: "food", 
+              location: "Orinokia Mall, Plaza Caroní", 
+              lat: 8.29329385355705, lng: -62.739520501485615, rating: 4.9, reviews: 342,
+              statusTag: "Abierto", infoTag: "Cierra a la 1:00 AM • 🛵 Delivery",
+              image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=600&q=80", 
+              description: "Una propuesta que combina gastronomía con música en vivo. Disfruta de carnes a la parrilla, pastas y hamburguesas.", 
+              whatsapp: "584129413934", instagram: "@lasonatarest.pzo", hours: "Jue a Dom • 12:00 PM a 1:00 AM",
+              amenities: ["Música en Vivo", "Karaoke", "Orinokia Mall"], 
+              menu: [
+                  { id: 'sn1', name: "Delicia Sonata", price: 14.00, desc: "Melocotón, tomates confitados con jamón curado, reducción balsámica y almendras sobre cama de queso", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200" },
+                  { id: 'sn2', name: "Carpaccio de Lomito", price: 14.50, desc: "Lomito finamente rebanado, tomates confitados, queso parmesano y pesto", img: "https://images.unsplash.com/photo-1544025162-8111f4a7615a?w=200" },
+                  { id: 'sn3', name: "Camarones Rebosados", price: 11.70, desc: "Ritmo crujiente con sabor a mar y salsa de la casa" },
+                  { id: 'sn4', name: "Tequeños (6 unidades)", price: 8.00, desc: "El clásico que nunca sale del setlist" }
+              ] 
+          },
+          { 
+              id: 102, name: "La Pequeña Beirut", category: "food", 
+              location: "Av. Las Américas", 
+              lat: 8.2950, lng: -62.7200, rating: 4.8, reviews: 512,
+              statusTag: "Abierto", infoTag: "Cierra a las 11:00 PM • 🛍️ Retiro",
+              image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80", 
+              description: "La auténtica comida árabe en el corazón de Puerto Ordaz. Shawarmas, cremas y más.", 
+              whatsapp: "584129413934", instagram: "@lapequenabeirut", hours: "Lun a Dom • 11:30 AM a 11:00 PM",
+              amenities: ["Comida Árabe", "Terraza", "Punto de Venta"], 
+              menu: [
+                  { id: 'be1', name: "Shawarma Mixto", price: 6.00, desc: "Carne y pollo con crema de ajo, crema de garbanzo y vegetales", img: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=200" },
+                  { id: 'be2', name: "Plato Mixto Árabe", price: 12.00, desc: "Tabaquitos, falafel, kibbeh, crema de ajo y pan pita", img: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=200" }
+              ] 
+          },
+          { 
+              id: 103, name: "Pimienta Restaurant", category: "food", 
+              location: "Hotel Tepuy", 
+              lat: 8.3000, lng: -62.7100, rating: 4.7, reviews: 180,
+              statusTag: "Cerrado", infoTag: "Abre mañana a las 7:00 AM • 🍽️ Local",
+              image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=600&q=80", 
+              description: "Alta cocina e internacional ubicada en las prestigiosas instalaciones del Hotel Tepuy.", 
+              whatsapp: "584129413934", instagram: "@pimientarest", hours: "Lun a Dom • 7:00 AM a 10:00 PM",
+              amenities: ["Alta Cocina", "Desayunos", "Hotel Tepuy"], 
+              menu: [
+                  { id: 'pm1', name: "Desayuno Tepuy", price: 8.50, desc: "Huevos al gusto, arepitas, queso guayanés y jugo natural", img: "https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?w=200" },
+                  { id: 'pm2', name: "Lomito a la Pimienta", price: 18.00, desc: "Corte de primera con reducción especial y papas gratinadas" }
+              ] 
+          },
+          { 
+              id: 104, name: "Café Panka", category: "cafe", 
+              location: "Alta Vista", 
+              lat: 8.2970, lng: -62.7160, rating: 4.8, reviews: 290,
+              statusTag: "Abierto", infoTag: "Cierra a las 8:00 PM • ☕ Mesas",
+              image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80", 
+              description: "Café de especialidad, postres y el mejor ambiente para trabajar o compartir en Alta Vista.", 
+              whatsapp: "584129413934", instagram: "@cafepanka", hours: "Lun a Sáb • 8:00 AM a 8:00 PM",
+              amenities: ["Café de Especialidad", "Wi-Fi", "Postres"], 
+              menu: [
+                  { id: 'pk1', name: "Cappuccino Italiano", price: 3.50, desc: "Espresso doble con leche texturizada", img: "https://images.unsplash.com/photo-1534687941688-1b1fa9ce307a?w=200" },
+                  { id: 'pk2', name: "Torta Red Velvet (Porción)", price: 4.50, desc: "Esponjosa con frosting de queso crema" }
+              ] 
+          },
+          { 
+              id: 105, name: "Daniels Fastfood", category: "food", 
+              location: "C.C Alta Vista, Piso 2", 
+              lat: 8.2980, lng: -62.7140, rating: 4.6, reviews: 410,
+              statusTag: "Abierto", infoTag: "Cierra a las 9:00 PM • 🛵 Delivery",
+              image: "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=600&q=80", 
+              description: "Comida rápida con sabor venezolano en la feria del C.C Alta Vista.", 
+              whatsapp: "584129413934", instagram: "@danielsfastfood", hours: "Lun a Dom • 11:00 AM a 9:00 PM",
+              amenities: ["Feria de Comida", "Combos", "Alta Vista"], 
+              menu: [
+                  { id: 'df1', name: "Combo Hamburguesa Clásica", price: 5.00, desc: "Incluye papas regulares y refresco", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200" },
+                  { id: 'df2', name: "Perro Caliente Especial", price: 2.00, desc: "Con salchicha polaca y full salsas" }
+              ] 
+          },
+          { 
+              id: 106, name: "La Alacena", category: "food", 
+              location: "C.C Chilemex", 
+              lat: 8.2900, lng: -62.7150, rating: 4.9, reviews: 155,
+              statusTag: "Cerrado", infoTag: "Abre a las 12:00 PM • 🍷 Bodegón",
+              image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80", 
+              description: "Restaurante y bodegón exclusivo en Chilemex con cortes importados y vinos.", 
+              whatsapp: "584129413934", instagram: "@laalacenapzo", hours: "Lun a Dom • 12:00 PM a 11:00 PM",
+              amenities: ["Bodegón", "Cortes Premium", "Vinos"], 
+              menu: [
+                  { id: 'al1', name: "Tomahawk Steak", price: 35.00, desc: "Corte premium madurado acompañado de vegetales grillados" },
+                  { id: 'al2', name: "Tabla de Quesos y Embutidos", price: 15.00, desc: "Ideal para acompañar con una botella de vino" }
+              ] 
+          },
+          { 
+              id: 1, name: "Er Kuadrito Burger", category: "food", 
+              location: "Alta Vista", lat: 8.2975, lng: -62.7161, rating: 4.9, reviews: 890,
+              statusTag: "Abierto", infoTag: "Cierra a las 11:30 PM • 🛵 Delivery",
+              image: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=600&q=80", 
+              description: "Las hamburguesas y pepitos más icónicos de Puerto Ordaz. Sabor guayanés puro.", 
+              whatsapp: "584129413934", instagram: "@erkuadrito", hours: "Lun a Dom • 5:00 PM a 11:30 PM",
+              amenities: ["Delivery Express", "Pick-up"], 
+              menu: [
+                  { id: 'ek1', name: "Hamburguesa Er Kuadrito Especial", price: 6.50, desc: "Carne, pollo, chuleta, queso guayanés", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200" }, 
+                  { id: 'ek2', name: "Pepito Mixto (30cm)", price: 8.00, desc: "Gratinado con tocineta crujiente" }
+              ] 
+          }
+      ];
+
+      window.cart = [];
+      window.cartPlace = null;
+      window.infoMapInstance = null;
+      window.infoMapMarker = null;
+
+      window.renderHomeGrid = function() {
+          const grid = document.getElementById('homeGrid');
+          grid.innerHTML = '';
+          window.places.forEach(p => {
+              let statusColor = p.statusTag === "Abierto" ? "text-emerald-500" : "text-red-500";
+              grid.innerHTML += `
+                  <div onclick="window.openModal(${p.id})" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer hover:shadow-md transition flex flex-col h-full">
+                      <div class="h-32 relative">
+                          <img src="${p.image}" class="w-full h-full object-cover">
+                          <div class="absolute top-2 left-2 bg-white/95 backdrop-blur-sm px-2 py-0.5 rounded shadow text-[10px] font-black ${statusColor} flex items-center gap-1">
+                              <i class="fa-solid fa-store"></i> ${p.statusTag}
+                          </div>
+                      </div>
+                      <div class="p-3 flex flex-col justify-between flex-grow">
+                          <h4 class="font-black text-slate-900 text-sm leading-tight mb-1">${p.name}</h4>
+                          <p class="text-[10px] text-slate-500 font-bold tracking-wide">${p.infoTag}</p>
+                      </div>
+                  </div>
+              `;
+          });
+      };
+
+      window.switchModalTab = function(tabName) {
+          ['tabMenu', 'tabInfo', 'tabReviews'].forEach(t => document.getElementById(t).classList.add('hidden'));
+          ['btnTabMenu', 'btnTabInfo', 'btnTabReviews'].forEach(b => {
+              const el = document.getElementById(b);
+              el.classList.remove('border-b-[3px]', 'border-[#FF4B2B]', 'text-slate-900');
+              el.classList.add('text-slate-400');
+          });
+
+          document.getElementById('tab' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.remove('hidden');
+          const activeBtn = document.getElementById('btnTab' + tabName.charAt(0).toUpperCase() + tabName.slice(1));
+          activeBtn.classList.remove('text-slate-400');
+          activeBtn.classList.add('border-b-[3px]', 'border-[#FF4B2B]', 'text-slate-900');
+
+          if (tabName === 'info' && window.currentPlace) {
+              setTimeout(() => {
+                  const lat = window.currentPlace.lat;
+                  const lng = window.currentPlace.lng;
+                  if (!window.infoMapInstance) {
+                      window.infoMapInstance = L.map('infoMapContainer').setView([lat, lng], 16);
+                      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(window.infoMapInstance);
+                      window.infoMapMarker = L.marker([lat, lng]).addTo(window.infoMapInstance);
+                  } else {
+                      window.infoMapInstance.setView([lat, lng], 16);
+                      window.infoMapMarker.setLatLng([lat, lng]);
+                      window.infoMapInstance.invalidateSize();
+                  }
+              }, 100);
+          }
+      };
+
+      window.openModal = function(id) {
+          window.currentPlace = window.places.find(p => p.id === id);
+          if(!window.currentPlace) return;
+          
+          document.getElementById('modalImage').src = window.currentPlace.image;
+          document.getElementById('modalTitle').innerText = window.currentPlace.name;
+          document.getElementById('modalCategorySub').innerText = window.currentPlace.category === 'food' ? 'Restaurante & Karaoke' : 'Comercio Local';
+          document.getElementById('modalStatusLive').innerText = window.currentPlace.statusTag === "Abierto" ? "Abierto" : "Cerrado";
+          document.getElementById('modalHoursLive').innerText = window.currentPlace.hours;
+          document.getElementById('modalRatingText').innerText = `${window.currentPlace.rating} (${window.currentPlace.reviews} reviews)`;
+          document.getElementById('modalDescription').innerText = window.currentPlace.description;
+          document.getElementById('btnWhatsappHeader').href = `https://wa.me/${window.currentPlace.whatsapp}?text=Hola,%20vengo%20de%20goordaz`;
+          document.getElementById('btnCallHeader').href = `tel:+${window.currentPlace.whatsapp}`;
+          
+          const menuTab = document.getElementById('tabMenu');
+          let popularHTML = window.currentPlace.menu.filter(m => m.img).map(m => `
+              <div onclick="window.scrollToProduct('${m.id}')" class="w-36 shrink-0 cursor-pointer group">
+                  <img src="${m.img}" class="w-full h-24 object-cover rounded-xl shadow-sm border border-slate-100 group-hover:scale-105 transition">
+                  <p class="font-bold text-slate-800 text-[11px] mt-1.5 truncate">${m.name}</p>
+                  <p class="text-[#FF4B2B] font-black text-xs">$${m.price.toFixed(2)}</p>
+              </div>
+          `).join('');
+          
+          let listHTML = window.currentPlace.menu.map(m => `
+              <div id="prod_${m.id}" class="bg-orange-50/40 border border-orange-100 p-3 rounded-2xl mb-2 flex justify-between items-center text-xs shadow-sm transition-all duration-500">
+                  <div class="pr-3">
+                      <b class="text-slate-900 text-sm">${m.name}</b>
+                      <p class="text-slate-500 text-[11px] mt-0.5 leading-tight">${m.desc || ''}</p>
+                      <p class="text-[#FF4B2B] font-black text-sm mt-1">$${m.price.toFixed(2)} USD</p>
+                  </div>
+                  <button onclick="window.addToCartItem('${m.id}', '${m.name}', ${m.price})" class="bg-brand-gradient text-white px-4 py-2.5 rounded-xl font-extrabold shadow-md shrink-0 active:scale-95 transition">+ Agregar</button>
+              </div>
+          `).join('');
+
+          menuTab.innerHTML = `
+              ${popularHTML ? `
+              <div class="mb-5">
+                  <h3 class="font-black text-slate-900 text-base mb-3">Platos Populares <span class="text-[10px] text-slate-400 font-normal">(Toca para ver detalles abajo)</span></h3>
+                  <div class="flex gap-3 overflow-x-auto scrollbar-none pb-2">${popularHTML}</div>
+              </div>` : ''}
+              
+              <div class="space-y-2 mb-6">
+                  <button onclick="document.getElementById('allProductsTitle').scrollIntoView({behavior: 'smooth'})" class="w-full bg-[#FF4B2B] hover:bg-orange-600 text-white font-black py-3.5 rounded-xl shadow-sm transition text-sm">Ver Menú Completo</button>
+                  <a href="https://wa.me/${window.currentPlace.whatsapp}?text=Hola,%20quisiera%20reservar%20una%20mesa" target="_blank" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-3.5 rounded-xl transition text-sm block text-center">Reservar Mesa / Cita</a>
+              </div>
+
+              <div class="pt-4 border-t border-slate-100">
+                  <h3 id="allProductsTitle" class="font-black text-slate-900 text-sm mb-3">Todos los Productos</h3>
+                  ${listHTML}
+              </div>
+          `;
+
+          document.getElementById('infoHours').innerText = window.currentPlace.hours;
+          document.getElementById('infoInstaText').innerText = window.currentPlace.instagram;
+          document.getElementById('infoInstaLink').href = `https://instagram.com/${window.currentPlace.instagram.replace('@','')}`;
+          document.getElementById('infoPhoneText').innerText = "0412-9413934";
+          document.getElementById('infoLocationText').innerText = window.currentPlace.location;
+
+          document.getElementById('reviewsScore').innerText = window.currentPlace.rating;
+          document.getElementById('reviewsCount').innerText = `Basado en más de ${window.currentPlace.reviews} reseñas reales`;
+          document.getElementById('googleReviewBtn').href = `https://search.google.com/local/reviews?placeid=ChIJkUeOsbb5y40Rm6vMKi59KvY`;
+
+          document.getElementById('placeModal').classList.remove('hidden');
+          window.switchModalTab('menu');
+      };
+
+      window.closeModal = function() { document.getElementById('placeModal').classList.add('hidden'); };
+
+      window.scrollToProduct = function(id) {
+          const el = document.getElementById('prod_' + id);
+          if(el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              el.classList.add('ring-4', 'ring-[#FF4B2B]', 'bg-orange-100', 'shadow-lg', 'scale-[1.02]');
+              setTimeout(() => {
+                  el.classList.remove('ring-4', 'ring-[#FF4B2B]', 'bg-orange-100', 'shadow-lg', 'scale-[1.02]');
+              }, 2200);
+          }
+      };
+
+      window.addToCartItem = function(id, name, price) {
+          if(window.cart.length > 0 && window.cartPlace.id !== window.currentPlace.id) {
+              if(confirm(`Tienes un pedido pendiente en ${window.cartPlace.name}.\n\n¿Vaciar carrito para pedir aquí?`)) { window.cart = []; } else { return; }
+          }
+          window.cartPlace = window.currentPlace;
+          let existing = window.cart.find(i => i.id === id);
+          if(existing) { existing.qty += 1; } else { window.cart.push({ id, name, price, qty: 1 }); }
+          window.updateCart();
+          window.openCheckoutModal();
+      };
+
+      window.updateCart = function() { 
+          let count = window.cart.reduce((s, i) => s + i.qty, 0); 
+          document.getElementById('navCartCount').innerText = count;
+          document.getElementById('navCartBadge').classList.toggle('hidden', count === 0);
+      };
+
+      window.openCheckoutModal = function() { window.renderCheckoutItems(); document.getElementById('checkoutModal').classList.remove('hidden'); };
+      window.closeCheckoutModal = function() { document.getElementById('checkoutModal').classList.add('hidden'); };
+
+      window.removeCartItem = function(idx) {
+          window.cart.splice(idx, 1);
+          if(window.cart.length === 0) window.cartPlace = null;
+          window.renderCheckoutItems();
+          window.updateCart();
+      };
+
+      window.renderCheckoutItems = function() {
+          const list = document.getElementById('checkoutItemsList');
+          document.getElementById('checkoutCommerceTitle').innerText = window.cartPlace ? `Resumen - ${window.cartPlace.name}` : "Tu Pedido";
+          if(window.cart.length === 0) {
+              list.innerHTML = `<p class="text-xs text-slate-400 text-center py-2 font-medium">Tu bolsa está vacía.</p>`;
+          } else {
+              list.innerHTML = window.cart.map((i, idx) => `
+                  <div class="flex justify-between items-center text-xs bg-white p-2.5 rounded-xl border border-orange-100 mb-2">
+                      <div><span class="font-extrabold">${i.qty}x ${i.name}</span> <span class="text-[#FF4B2B] font-black ml-1">$${(i.price * i.qty).toFixed(2)}</span></div>
+                      <button onclick="window.removeCartItem(${idx})" class="text-red-500 font-bold"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+              `).join('');
+          }
+          window.updateCartTotal();
+      };
+
+      window.updateCartTotal = function() {
+          let subtotal = window.cart.reduce((s, i) => s + (i.price * i.qty), 0);
+          let dtype = document.getElementById('deliveryType').value;
+          let deliveryFee = (dtype === 'delivery' && window.cart.length > 0) ? 2.00 : 0.00;
+          document.getElementById('deliveryAddressBox').style.display = (dtype === 'delivery') ? 'block' : 'none';
+          document.getElementById('cartTotalPrice').innerText = `$${(subtotal + deliveryFee).toFixed(2)} USD`;
+      };
+
+      window.togglePaymentFields = function() { 
+          document.getElementById('pagoMovilData').style.display = (document.getElementById('paymentMethod').value === 'Pago Móvil') ? 'block' : 'none'; 
+      };
+
+      window.sendOrderToWhatsapp = function() {
+          if(window.cart.length === 0) return alert("Carrito vacío.");
+          let name = document.getElementById('clientName').value.trim();
+          let dtype = document.getElementById('deliveryType').value;
+          let address = document.getElementById('clientAddress').value.trim();
+          let ref = document.getElementById('pagoRef').value.trim();
+          if(!name) return alert("Falta nombre");
+          if(dtype === 'delivery' && !address) return alert("Falta dirección");
+          
+          let total = window.cart.reduce((s, i) => s + (i.price * i.qty), 0) + (dtype === 'delivery' ? 2 : 0);
+          let msg = `Hola *${window.cartPlace.name}*, pedido vía *goordaz* 🔥:\n\n👤 *Cliente:* ${name}\n📦 *Modalidad:* ${dtype === 'delivery'?'Delivery':'Retiro/Local'}\n${dtype === 'delivery'?`📍 *Dir:* ${address}\n`:''}💳 *Pago:* ${document.getElementById('paymentMethod').value} ${ref?'(Ref: '+ref+')':''}\n\n*Detalle:*\n`;
+          window.cart.forEach(i => msg += `• ${i.qty}x ${i.name} = $${(i.price * i.qty).toFixed(2)}\n`);
+          msg += `\n💰 *TOTAL:* $${total.toFixed(2)} USD`;
+
+          window.open(`https://wa.me/${window.cartPlace.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+      };
+
+      window.addEventListener('DOMContentLoaded', () => { window.renderHomeGrid(); });
+  </script>
+</head>
+<body class="bg-[#FFFDFB] text-slate-800 pb-28">
+
+  <header class="bg-white/95 backdrop-blur-md shadow-sm border-b border-orange-100/60 sticky top-0 z-40 px-4 py-3">
+      <div class="max-w-7xl mx-auto flex justify-between items-center">
+          <div class="flex flex-col">
+              <div class="flex items-baseline cursor-pointer">
+                  <span class="text-2xl font-black tracking-tighter text-[#FF4B2B] leading-none">go</span>
+                  <span class="text-2xl font-extrabold tracking-tight text-slate-900 leading-none">ordaz</span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400 ml-0.5"></span>
+              </div>
+              <button class="text-[10px] font-bold text-slate-500 flex items-center gap-1 hover:text-[#FF4B2B] transition mt-1">
+                  <i class="fa-solid fa-location-dot text-[#FF4B2B]"></i> PZO (Alta Vista) <i class="fa-solid fa-chevron-down text-[8px]"></i>
+              </button>
+          </div>
+          <div class="bg-orange-50 border border-orange-200/70 px-3 py-1.5 rounded-2xl text-xs font-bold flex items-center gap-1.5">
+              <i class="fa-solid fa-coins text-orange-500"></i> <strong class="text-slate-900">36.20 Bs</strong>
+          </div>
+      </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 mt-5 space-y-6">
+      <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-5 text-[#FF4B2B]"><i class="fa-solid fa-magnifying-glass"></i></span>
+          <input type="text" placeholder="¿Qué te provoca hoy en Puerto Ordaz?" class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold shadow-sm focus:outline-none focus:border-[#FF4B2B] transition placeholder-slate-400">
+      </div>
+
+      <div class="flex gap-4 overflow-x-auto scrollbar-none pb-2">
+          <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group w-20">
+              <div class="w-16 h-16 bg-[#FFF2E5] rounded-[20px] flex items-center justify-center text-3xl shadow-sm border border-orange-100 group-hover:scale-105 transition">🍔</div>
+              <span class="text-[11px] font-black text-slate-700">Comida</span>
+          </div>
+          <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group w-20">
+              <div class="w-16 h-16 bg-[#F3E8FF] rounded-[20px] flex items-center justify-center text-3xl shadow-sm border border-purple-100 group-hover:scale-105 transition">☕</div>
+              <span class="text-[11px] font-black text-slate-700">Café</span>
+          </div>
+          <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group w-20">
+              <div class="w-16 h-16 bg-[#E0F2FE] rounded-[20px] flex items-center justify-center text-3xl shadow-sm border border-blue-100 group-hover:scale-105 transition">🛍️</div>
+              <span class="text-[11px] font-black text-slate-700">Tiendas</span>
+          </div>
+          <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group w-20">
+              <div class="w-16 h-16 bg-[#DCFCE7] rounded-[20px] flex items-center justify-center text-3xl shadow-sm border border-green-100 group-hover:scale-105 transition">💊</div>
+              <span class="text-[11px] font-black text-slate-700">Salud</span>
+          </div>
+          <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group w-20">
+              <div class="w-16 h-16 bg-[#FEF9C3] rounded-[20px] flex items-center justify-center text-3xl shadow-sm border border-yellow-100 group-hover:scale-105 transition">✂️</div>
+              <span class="text-[11px] font-black text-slate-700">Servicios</span>
+          </div>
+      </div>
+
+      <div>
+          <h2 class="text-lg font-black text-slate-900 mb-4">Comercios Cerca de Ti</h2>
+          <div id="homeGrid" class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4"></div>
+      </div>
+  </main>
+
+  <nav class="fixed bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-100 py-3 px-6 z-40 max-w-lg mx-auto rounded-[30px] shadow-2xl flex justify-around items-center">
+      <button class="flex flex-col items-center text-[#FF4B2B] gap-1 group">
+          <i class="fa-solid fa-house text-xl group-hover:scale-110 transition"></i><span class="text-[9px] font-black uppercase">Inicio</span>
+      </button>
+      <button class="flex flex-col items-center text-slate-400 hover:text-[#FF4B2B] gap-1 group transition">
+          <i class="fa-solid fa-map-location-dot text-xl group-hover:scale-110 transition"></i><span class="text-[9px] font-black uppercase">Mapa</span>
+      </button>
+      <button onclick="window.openCheckoutModal()" class="flex flex-col items-center text-slate-400 hover:text-[#FF4B2B] gap-1 group relative transition">
+          <div id="navCartBadge" class="hidden bg-[#FF4B2B] text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black absolute -top-2 -right-2 shadow border-2 border-white">0</div>
+          <i class="fa-solid fa-bag-shopping text-xl group-hover:scale-110 transition"></i><span class="text-[9px] font-black uppercase">Pedido</span>
+      </button>
+  </nav>
+
+  <!-- MODAL FICHA -->
+  <div id="placeModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4">
+      <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-2xl w-full h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col relative animate-slide-up">
+          
+          <div class="absolute top-4 left-4 right-4 flex justify-between z-20">
+              <button onclick="window.closeModal()" class="bg-black/40 backdrop-blur-md text-white w-9 h-9 rounded-full flex items-center justify-center hover:bg-black/60 transition"><i class="fa-solid fa-chevron-down"></i></button>
+          </div>
+
+          <div class="overflow-y-auto pb-8 scrollbar-none flex-grow bg-white">
+              <div class="h-72 w-full relative">
+                  <img id="modalImage" src="" class="w-full h-full object-cover">
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
+                  <div class="absolute bottom-4 left-5 right-5 text-white">
+                      
+                      <!-- Detalle Estilo Yelp (Precio, Categoría y Horario debajo de la foto) -->
+                      <div class="flex flex-wrap items-center gap-2 text-[11px] font-extrabold text-slate-300 mb-1.5">
+                          <span class="text-amber-400 font-extrabold">$$</span>
+                          <span>•</span>
+                          <span id="modalCategorySub" class="uppercase tracking-wider">Restaurante</span>
+                          <span>•</span>
+                          <span class="text-emerald-400 flex items-center gap-1 font-bold">
+                              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <span id="modalStatusLive">Abierto</span>
+                          </span>
+                      </div>
+
+                      <h2 id="modalTitle" class="text-2xl font-black text-white drop-shadow-lg leading-tight mb-1">Nombre</h2>
+                      
+                      <p class="text-[12px] font-semibold text-slate-300 mb-2" id="modalHoursLive">Horario</p>
+
+                      <div class="flex items-center gap-2">
+                          <span class="text-[#FF4B2B] text-sm drop-shadow"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
+                          <span class="text-xs font-bold text-slate-200" id="modalRatingText">4.9 (342 reviews)</span>
+                      </div>
+                  </div>
+              </div>
+
+              <div class="p-5">
+                  <div class="flex gap-2 overflow-x-auto scrollbar-none pb-2 mb-4">
+                      <button onclick="window.switchModalTab('reviews')" class="shrink-0 bg-red-600 hover:bg-red-700 text-white font-extrabold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 shadow-sm transition"><i class="fa-solid fa-star"></i> Valorar</button>
+                      <a id="btnWhatsappHeader" href="#" target="_blank" class="shrink-0 border border-slate-200 text-slate-700 font-extrabold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 hover:bg-slate-50 transition"><i class="fa-brands fa-whatsapp text-emerald-500 text-lg"></i> WhatsApp</a>
+                      <a id="btnCallHeader" href="#" class="shrink-0 border border-slate-200 text-slate-700 font-extrabold px-5 py-2.5 rounded-xl text-sm flex items-center gap-2 hover:bg-slate-50 transition"><i class="fa-solid fa-phone"></i> Llamar</a>
+                  </div>
+                  
+                  <p id="modalDescription" class="text-[13px] text-slate-600 font-medium leading-relaxed mb-6"></p>
+
+                  <div class="flex gap-6 border-b border-slate-200 text-sm font-extrabold px-1">
+                      <button id="btnTabMenu" onclick="window.switchModalTab('menu')" class="pb-3 border-b-[3px] border-[#FF4B2B] text-slate-900 transition-colors">Catálogo / Menú</button>
+                      <button id="btnTabInfo" onclick="window.switchModalTab('info')" class="pb-3 text-slate-400 hover:text-slate-600 transition-colors">Info / Ubicación</button>
+                      <button id="btnTabReviews" onclick="window.switchModalTab('reviews')" class="pb-3 text-slate-400 hover:text-slate-600 transition-colors">Opiniones</button>
+                  </div>
+
+                  <div id="tabMenu" class="mt-5 animate-slide-up"></div>
+                  
+                  <div id="tabInfo" class="mt-5 space-y-4 animate-slide-up hidden">
+                      <div class="bg-white rounded-3xl border border-slate-100 p-1 shadow-sm">
+                          <div class="flex items-center justify-between p-4 border-b border-slate-50">
+                              <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center"><i class="fa-regular fa-clock"></i></div>
+                              <div><p class="text-[10px] font-black text-slate-400 uppercase">Horario</p><p class="text-xs font-bold text-slate-800" id="infoHours"></p></div></div>
+                          </div>
+                          <a id="infoInstaLink" href="#" target="_blank" class="flex items-center justify-between p-4 border-b border-slate-50">
+                              <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-pink-50 text-pink-500 flex items-center justify-center"><i class="fa-brands fa-instagram"></i></div>
+                              <div><p class="text-[10px] font-black text-slate-400 uppercase">Instagram</p><p class="text-xs font-bold text-slate-800" id="infoInstaText"></p></div></div><i class="fa-solid fa-arrow-up-right-from-square text-slate-300"></i>
+                          </a>
+                          <div class="flex items-center justify-between p-4">
+                              <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center"><i class="fa-solid fa-phone"></i></div>
+                              <div><p class="text-[10px] font-black text-slate-400 uppercase">Teléfono</p><p class="text-xs font-bold text-slate-800" id="infoPhoneText"></p></div></div>
+                          </div>
+                      </div>
+                      <div class="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm">
+                          <h4 class="font-black text-slate-900 text-sm mb-1">Ubicación</h4>
+                          <p class="text-xs text-slate-500 mb-3" id="infoLocationText"></p>
+                          <div id="infoMapContainer" class="w-full h-48 bg-slate-100 rounded-2xl overflow-hidden relative border border-slate-200 z-10"></div>
+                          <button onclick="window.open('https://maps.google.com/?q=' + window.currentPlace.lat + ',' + window.currentPlace.lng, '_blank')" class="w-full mt-3 border border-slate-200 text-[#FF4B2B] font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-2 hover:bg-orange-50 transition">
+                              <i class="fa-solid fa-map-location-dot"></i> Abrir en Google Maps
+                          </button>
+                      </div>
+                  </div>
+
+                  <div id="tabReviews" class="mt-5 animate-slide-up hidden py-8 px-4 text-center bg-white rounded-3xl border border-slate-100 shadow-sm">
+                      <h3 id="reviewsScore" class="text-5xl font-black text-slate-900 mb-2">4.9</h3>
+                      <div class="flex justify-center items-center gap-1 text-[#FF4B2B] text-xl mb-1">
+                          <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                      </div>
+                      <p id="reviewsCount" class="text-xs font-bold text-slate-500 mb-6">Basado en reseñas de Google</p>
+                      <a id="googleReviewBtn" href="#" target="_blank" class="w-full bg-white border border-slate-200 shadow-sm hover:shadow text-slate-700 font-extrabold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-3">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="w-5 h-5">
+                              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                          </svg>
+                          Ver y dejar opiniones en Google
+                      </a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- MODAL CHECKOUT -->
+  <div id="checkoutModal" class="fixed inset-0 z-[60] bg-slate-900/70 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
+      <div class="bg-white rounded-[24px] max-w-sm w-full overflow-y-auto max-h-[92vh] shadow-2xl flex flex-col p-5 space-y-3">
+          <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+              <h3 id="checkoutCommerceTitle" class="font-black text-base text-slate-900">Tu Pedido</h3>
+              <button onclick="window.closeCheckoutModal()" class="text-slate-400 text-lg"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div id="checkoutItemsList" class="space-y-2 p-2 rounded-xl bg-slate-50 border border-slate-100"></div>
+          <div class="space-y-2.5 text-xs pt-1">
+              <div class="grid grid-cols-2 gap-2">
+                  <div><label class="font-bold text-slate-700 block mb-1">Nombre:</label><input type="text" id="clientName" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#FF4B2B]"></div>
+                  <div><label class="font-bold text-slate-700 block mb-1">Cédula:</label><div class="flex gap-1"><select id="docType" class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"><option value="V-">V-</option></select><input type="text" id="clientDoc" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"></div></div>
+              </div>
+              <div><label class="font-bold text-slate-700 block mb-1">Modalidad:</label><select id="deliveryType" onchange="window.updateCartTotal()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"><option value="delivery">🛵 Delivery (+$2.00)</option><option value="pickup">🛍️ Retirar / Cita Local</option></select></div>
+              <div><label class="font-bold text-slate-700 block mb-1">Método de Pago:</label><select id="paymentMethod" onchange="window.togglePaymentFields()" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"><option value="Pago Móvil">📱 Pago Móvil</option><option value="Efectivo / Zelle">💵 Divisas / Zelle</option></select></div>
+              <div id="pagoMovilData" class="bg-orange-50/60 p-3 rounded-xl border border-orange-200 space-y-2">
+                  <p class="font-extrabold text-[#FF4B2B] text-[10px]">📲 Datos Demo: Banesco | 0412-9999999 | J-12345</p>
+                  <div class="flex items-center gap-2"><label class="font-bold">Ref (4 dígitos):</label><input type="text" id="pagoRef" maxlength="4" class="w-20 p-1.5 bg-white border border-orange-300 rounded-lg text-center font-black"></div>
+              </div>
+              <div id="deliveryAddressBox"><label class="font-bold text-slate-700 block mb-1">Dirección Exacta:</label><input type="text" id="clientAddress" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:border-[#FF4B2B]"></div>
+          </div>
+          <div class="pt-3 border-t border-slate-100 mt-2">
+              <div class="flex justify-between items-center bg-slate-50 px-3.5 py-2.5 rounded-xl font-black text-sm mb-3">
+                  <span class="text-slate-700">TOTAL:</span><span id="cartTotalPrice" class="text-[#FF4B2B] text-lg">$0.00 USD</span>
+              </div>
+              <button onclick="window.sendOrderToWhatsapp()" class="w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white font-black py-3.5 rounded-xl text-sm flex items-center justify-center gap-2 shadow-md transition">
+                  <i class="fa-brands fa-whatsapp text-lg"></i> Confirmar vía WhatsApp
+              </button>
+          </div>
+      </div>
+  </div>
+
+</body>
+</html>
