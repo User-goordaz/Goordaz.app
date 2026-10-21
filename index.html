@@ -26,7 +26,6 @@
   </style>
 
   <script>
-      // Ubicación por defecto: Alta Vista, Puerto Ordaz
       window.userLat = 8.2975;
       window.userLng = -62.7161;
 
@@ -48,7 +47,7 @@
               id: 102, name: "La Pequeña Beirut", category: "food", 
               location: "Av. Las Américas", 
               lat: 8.2950, lng: -62.7200, rating: 4.8, reviews: 512,
-              openHour: 11, closeHour: 23, days: [1, 2, 3, 4, 5, 6, 0], // Todos los días
+              openHour: 11, closeHour: 23, days: [1, 2, 3, 4, 5, 6, 0],
               image: "https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=600&q=80", 
               description: "La auténtica comida árabe en el corazón de Puerto Ordaz. Shawarmas, cremas y más.", 
               whatsapp: "584129413934", instagram: "@lapequenabeirut", hours: "Lun a Dom • 11:30 AM a 11:00 PM",
@@ -69,35 +68,26 @@
           }
       ];
 
-      // Motor de Horario Exacto de Venezuela (UTC-4)
+      // Sincronizador de Hora de Venezuela (UTC-4)
       window.getVenezuelaTime = function() {
           const now = new Date();
-          // Forzar zona horaria de Caracas
           const options = { timeZone: 'America/Caracas', hour: 'numeric', minute: 'numeric', hour12: false, weekday: 'short' };
           const formatter = new Intl.DateTimeFormat('en-US', options);
           const parts = formatter.formatToParts(now);
-          
           let hour = 0, minute = 0, weekdayStr = 'Mon';
           parts.forEach(p => {
               if (p.type === 'hour') hour = parseInt(p.value);
               if (p.type === 'minute') minute = parseInt(p.value);
               if (p.type === 'weekday') weekdayStr = p.value;
           });
-
-          // Mapeo de días a números (0: Domingo, 1: Lunes...)
           const daysMap = { 'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6 };
           return { day: daysMap[weekdayStr] ?? 1, decimalHour: hour + (minute / 60) };
       };
 
       window.checkOpenStatus = function(p) {
           const vzla = window.getVenezuelaTime();
-          if (!p.days.includes(vzla.day)) return { status: "Cerrado", tag: "Cerrado hoy" };
-          
-          if (vzla.decimalHour >= p.openHour && vzla.decimalHour < p.closeHour) {
-              return { status: "Abierto", tag: `Abierto • Cierra a las ${p.closeHour}:00` };
-          } else {
-              return { status: "Cerrado", tag: "Cerrado en este momento" };
-          }
+          if (!p.days.includes(vzla.day)) return false;
+          return (vzla.decimalHour >= p.openHour && vzla.decimalHour < p.closeHour);
       };
 
       window.calculateDistance = function(lat1, lon1, lat2, lon2) {
@@ -128,20 +118,22 @@
 
           let processed = window.places.map(p => {
               let dist = parseFloat(window.calculateDistance(window.userLat, window.userLng, p.lat, p.lng));
-              let liveState = window.checkOpenStatus(p);
-              return { ...p, distance: dist, liveStatus: liveState.status, liveTag: liveState.tag };
+              let isOpen = window.checkOpenStatus(p);
+              return { ...p, distance: dist, isOpen };
           });
 
           processed.sort((a, b) => a.distance - b.distance);
 
           processed.forEach(p => {
-              let statusColor = p.liveStatus === "Abierto" ? "text-emerald-500" : "text-red-500";
+              let statusColor = p.isOpen ? "text-emerald-500" : "text-red-500";
+              let statusText = p.isOpen ? "Abierto" : "Cerrado";
+              
               let cardHTML = `
                   <div onclick="window.openModal(${p.id})" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer hover:shadow-md transition flex flex-col h-full shrink-0 w-44 sm:w-auto">
                       <div class="h-32 relative">
                           <img src="${p.image}" class="w-full h-full object-cover">
                           <div class="absolute top-2 left-2 bg-white/95 backdrop-blur-sm px-2 py-0.5 rounded shadow text-[10px] font-black ${statusColor} flex items-center gap-1">
-                              <i class="fa-solid fa-store"></i> ${p.liveStatus}
+                              <i class="fa-solid fa-store"></i> ${statusText}
                           </div>
                           <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md text-white px-2 py-0.5 rounded-lg text-[10px] font-bold">
                               📍 ${p.distance} km
@@ -154,7 +146,7 @@
                   </div>
               `;
 
-              if (p.distance <= 10.0) gridNear.innerHTML += cardHTML;
+              gridNear.innerHTML += cardHTML;
               gridAll.innerHTML += cardHTML;
           });
       };
@@ -193,11 +185,11 @@
           window.currentPlace = window.places.find(p => p.id === id);
           if(!window.currentPlace) return;
           
-          let liveState = window.checkOpenStatus(window.currentPlace);
+          let isOpen = window.checkOpenStatus(window.currentPlace);
           document.getElementById('modalImage').src = window.currentPlace.image;
           document.getElementById('modalTitle').innerText = window.currentPlace.name;
           document.getElementById('modalCategorySub').innerText = window.currentPlace.category === 'food' ? 'Restaurante & Karaoke' : 'Comercio Local';
-          document.getElementById('modalStatusLive').innerText = liveState.status;
+          document.getElementById('modalStatusLive').innerText = isOpen ? "Abierto" : "Cerrado";
           document.getElementById('modalHoursLive').innerText = window.currentPlace.hours;
           document.getElementById('modalRatingText').innerText = `${window.currentPlace.rating} (${window.currentPlace.reviews} reviews)`;
           document.getElementById('modalDescription').innerText = window.currentPlace.description;
@@ -258,6 +250,22 @@
 
       window.closeModal = function() { document.getElementById('placeModal').classList.add('hidden'); };
 
+      // POP-UP ESTILO YUMMY DE COMERCIO INACTIVO / CERRADO
+      window.checkInactiveModal = function(place) {
+          let isOpen = window.checkOpenStatus(place);
+          if (!isOpen) {
+              document.getElementById('inactivePlaceName').innerText = `${place.name} está inactivo`;
+              document.getElementById('inactiveModalText').innerText = `${place.name} volverá contigo en su horario habitual (${place.hours}). Puedes explorar el menú o agendar tu pedido para más tarde.`;
+              document.getElementById('inactiveModal').classList.remove('hidden');
+              return true;
+          }
+          return false;
+      };
+
+      window.closeInactiveModal = function() {
+          document.getElementById('inactiveModal').classList.add('hidden');
+      };
+
       window.scrollToProduct = function(id) {
           const el = document.getElementById('prod_' + id);
           if(el) {
@@ -273,6 +281,11 @@
       window.cartPlace = null;
 
       window.addToCartItem = function(id, name, price) {
+          // Validar si el comercio está cerrado para lanzar el pop-up estilo Yummy
+          if (window.checkInactiveModal(window.currentPlace)) {
+              return; // Detiene la compra si está cerrado
+          }
+
           if(window.cart.length > 0 && window.cartPlace.id !== window.currentPlace.id) {
               if(confirm(`Tienes un pedido pendiente en ${window.cartPlace.name}.\n\n¿Vaciar carrito para pedir aquí?`)) { window.cart = []; } else { return; }
           }
@@ -288,7 +301,12 @@
           document.getElementById('navCartBadge').classList.toggle('hidden', count === 0);
       };
 
-      window.openCheckoutModal = function() { window.renderCheckoutItems(); document.getElementById('checkoutModal').classList.remove('hidden'); };
+      window.openCheckoutModal = function() { 
+          if (window.currentPlace && window.checkInactiveModal(window.currentPlace)) return;
+          window.renderCheckoutItems(); 
+          document.getElementById('checkoutModal').classList.remove('hidden'); 
+      };
+
       window.closeCheckoutModal = function() { document.getElementById('checkoutModal').classList.add('hidden'); };
 
       window.removeCartItem = function(idx) {
@@ -460,6 +478,28 @@
           <i class="fa-solid fa-bag-shopping text-lg group-hover:scale-110 transition"></i><span class="text-[9px] font-black uppercase">Pedido</span>
       </button>
   </nav>
+
+  <!-- POP-UP ESTILO YUMMY: COMERCIO INACTIVO / CERRADO -->
+  <div id="inactiveModal" class="fixed inset-0 z-[70] bg-slate-900/70 backdrop-blur-sm hidden flex items-end justify-center p-0 sm:p-4">
+      <div class="bg-white rounded-t-[32px] sm:rounded-3xl max-w-md w-full p-6 shadow-2xl flex flex-col text-center space-y-4 animate-slide-up">
+          <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-1"></div>
+          <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center text-[#FF4B2B] text-2xl mx-auto">
+              <i class="fa-solid fa-store-slash"></i>
+          </div>
+          <div>
+              <h3 id="inactivePlaceName" class="font-black text-xl text-slate-900 mb-1">Comercio Inactivo</h3>
+              <p id="inactiveModalText" class="text-xs text-slate-500 font-medium px-4 leading-relaxed">Puedes agendar tu pedido para más tarde o explorar el menú libremente.</p>
+          </div>
+          <div class="space-y-2 pt-2">
+              <button onclick="window.closeInactiveModal()" class="w-full bg-[#00A86B] hover:bg-emerald-600 text-white font-extrabold py-3.5 rounded-2xl text-sm shadow-md transition">
+                  EXPLORAR EL MENÚ
+              </button>
+              <button onclick="window.closeInactiveModal(); window.closeModal();" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-3 rounded-2xl text-xs transition">
+                  VER EL COMERCIO ACTUAL
+              </button>
+          </div>
+      </div>
+  </div>
 
   <!-- MODAL FICHA -->
   <div id="placeModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4">
