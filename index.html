@@ -31,6 +31,19 @@
 
       window.places = [
           { 
+              id: 1, name: "Concierto SanLuis - World Tour", category: "event", 
+              location: "Club Ítalo Venezolano, PZO", 
+              lat: 8.2700, lng: -62.7500, rating: 5.0, reviews: 1240,
+              image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=80", 
+              description: "El dúo venezolano SanLuis se presenta en Puerto Ordaz con su gira 'Aunque Sea Todo World Tour'. ¡No te lo pierdas!", 
+              whatsapp: "584129413934", phone: "0412-9413934", instagram: "@vibraproductions", hours: "21 Nov 2026 • Acceso 7:00 PM / Show 10:30 PM",
+              ticketUrl: "https://tickets.vibraproductions.com/sanluis-puertoordaz-202611212000",
+              menu: [
+                  { id: 'ev1', name: "Entrada General Preventa", price: 25.00, desc: "Acceso al área general del concierto" },
+                  { id: 'ev2', name: "Tobo de Cervezas Oficial", price: 15.00, desc: "10 unidades bien frías en zona de mesas" }
+              ] 
+          },
+          { 
               id: 101, name: "La Sonata Restaurant & Karaoke", category: "food", 
               location: "Orinokia Mall, Plaza Caroní", 
               lat: 8.29329385355705, lng: -62.739520501485615, rating: 4.9, reviews: 342,
@@ -38,10 +51,8 @@
               description: "Una propuesta que combina gastronomía con música en vivo. Disfruta de carnes a la parrilla, pastas y hamburguesas.", 
               whatsapp: "584129413934", phone: "0412-9413934", instagram: "@lasonatarest.pzo", hours: "Jue a Dom • 12:00 PM a 1:00 AM",
               menu: [
-                  { id: 'sn1', name: "Delicia Sonata", price: 14.00, desc: "Melocotón, tomates confitados con jamón curado, reducción balsámica y almendras sobre cama de queso", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200" },
-                  { id: 'sn2', name: "Carpaccio de Lomito", price: 14.50, desc: "Lomito finamente rebanado, tomates confitados, queso parmesano y pesto", img: "https://images.unsplash.com/photo-1544025162-8111f4a7615a?w=200" },
-                  { id: 'sn3', name: "Camarones Rebosados", price: 11.70, desc: "Ritmo crujiente con sabor a mar y salsa de la casa" },
-                  { id: 'sn4', name: "Tequeños (6 unidades)", price: 8.00, desc: "El clásico que nunca sale del setlist" }
+                  { id: 'sn1', name: "Delicia Sonata", price: 14.00, desc: "Melocotón, tomates confitados con jamón curado y almendras", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200" },
+                  { id: 'sn2', name: "Carpaccio de Lomito", price: 14.50, desc: "Lomito finamente rebanado, parmesano y pesto", img: "https://images.unsplash.com/photo-1544025162-8111f4a7615a?w=200" }
               ] 
           },
           { 
@@ -52,19 +63,7 @@
               description: "La auténtica comida árabe en el corazón de Puerto Ordaz. Shawarmas, cremas y más.", 
               whatsapp: "584129413934", phone: "0412-9413934", instagram: "@lapequenabeirut", hours: "Lun a Dom • 11:30 AM a 11:00 PM",
               menu: [
-                  { id: 'be1', name: "Shawarma Mixto", price: 6.00, desc: "Carne y pollo con crema de ajo, crema de garbanzo y vegetales", img: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=200" },
-                  { id: 'be2', name: "Plato Mixto Árabe", price: 12.00, desc: "Tabaquitos, falafel, kibbeh, crema de ajo y pan pita", img: "https://images.unsplash.com/photo-1541518763669-27fef04b14ea?w=200" }
-              ] 
-          },
-          { 
-              id: 1, name: "Er Kuadrito Burger", category: "food", 
-              location: "Alta Vista", lat: 8.2975, lng: -62.7161, rating: 4.9, reviews: 890,
-              image: "https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=600&q=80", 
-              description: "Las hamburguesas y pepitos más icónicos de Puerto Ordaz. Sabor guayanés puro.", 
-              whatsapp: "584129413934", phone: "0412-9413934", instagram: "@erkuadrito", hours: "Lun a Dom • 5:00 PM a 11:30 PM",
-              menu: [
-                  { id: 'ek1', name: "Hamburguesa Er Kuadrito Especial", price: 6.50, desc: "Carne, pollo, chuleta, queso guayanés", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200" }, 
-                  { id: 'ek2', name: "Pepito Mixto (30cm)", price: 8.00, desc: "Gratinado con tocineta crujiente" }
+                  { id: 'be1', name: "Shawarma Mixto", price: 6.00, desc: "Carne y pollo con crema de ajo y garbanzo", img: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=200" }
               ] 
           }
       ];
@@ -80,13 +79,41 @@
       };
 
       window.initApp = function() {
+          window.userLat = 8.2975;
+          window.userLng = -62.7161;
+
           if (navigator.geolocation) {
               navigator.geolocation.getCurrentPosition(pos => {
                   window.userLat = pos.coords.latitude;
                   window.userLng = pos.coords.longitude;
-                  window.renderGrids();
-              }, () => { window.renderGrids(); });
-          } else { window.renderGrids(); }
+                  window.renderAllViews();
+              }, () => { window.renderAllViews(); }, { timeout: 8000 });
+          } else { window.renderAllViews(); }
+      };
+
+      window.renderAllViews = function() {
+          window.renderEventsCarousel();
+          window.renderGrids();
+      };
+
+      window.renderEventsCarousel = function() {
+          const eventsContainer = document.getElementById('eventsCarouselContainer');
+          if(!eventsContainer) return;
+          eventsContainer.innerHTML = '';
+
+          const eventsList = window.places.filter(p => p.category === 'event');
+          eventsList.forEach(ev => {
+              eventsContainer.innerHTML += `
+                  <a href="${ev.ticketUrl || '#'}" target="_blank" class="shrink-0 w-72 h-40 rounded-3xl overflow-hidden relative shadow-md group block border border-orange-100">
+                      <img src="${ev.image}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                      <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-4 text-white">
+                          <span class="bg-amber-400 text-slate-900 font-black text-[9px] px-2 py-0.5 rounded-md w-max mb-1">🎟️ PRÓXIMO EVENTO</span>
+                          <h3 class="font-black text-sm leading-tight">${ev.name}</h3>
+                          <p class="text-[10px] text-slate-300">${ev.hours} • Toca para entradas</p>
+                      </div>
+                  </a>
+              `;
+          });
       };
 
       window.renderGrids = function() {
@@ -97,17 +124,18 @@
           gridNear.innerHTML = '';
           gridAll.innerHTML = '';
 
-          let processed = window.places.map(p => {
+          let processed = window.places.filter(p => p.category !== 'event').map(p => {
               let dist = parseFloat(window.calculateDistance(window.userLat, window.userLng, p.lat, p.lng));
               return { ...p, distance: dist };
           });
 
           processed.sort((a, b) => a.distance - b.distance);
 
+          // Carrusel "Cerca de ti" (Ancho fijo simétrico en PC)
           processed.forEach(p => {
-              let cardHTML = `
-                  <div onclick="window.openModal(${p.id})" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer hover:shadow-md transition flex flex-col h-full shrink-0 w-44 sm:w-auto">
-                      <div class="h-32 relative">
+              let cardNearHTML = `
+                  <div onclick="window.openModal(${p.id})" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer hover:shadow-md transition flex flex-col shrink-0 w-60 min-w-[240px] max-w-[240px]">
+                      <div class="h-32 w-full relative">
                           <img src="${p.image}" class="w-full h-full object-cover">
                           <div class="absolute top-2 left-2 bg-white/95 backdrop-blur-sm px-2 py-0.5 rounded shadow text-[10px] font-black text-emerald-500 flex items-center gap-1">
                               <i class="fa-solid fa-store"></i> Abierto
@@ -118,13 +146,73 @@
                       </div>
                       <div class="p-3 flex flex-col justify-between flex-grow">
                           <h4 class="font-black text-slate-900 text-sm leading-tight mb-1 truncate">${p.name}</h4>
-                          <p class="text-[10px] text-slate-500 font-bold tracking-wide">${p.location}</p>
+                          <p class="text-[10px] text-slate-500 font-bold truncate">${p.location}</p>
                       </div>
                   </div>
               `;
+              gridNear.innerHTML += cardNearHTML;
+          });
 
-              gridNear.innerHTML += cardHTML;
-              gridAll.innerHTML += cardHTML;
+          // Directorio Completo (Grid adaptable)
+          processed.forEach(p => {
+              let cardAllHTML = `
+                  <div onclick="window.openModal(${p.id})" class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden cursor-pointer hover:shadow-md transition flex flex-col h-full">
+                      <div class="h-36 w-full relative">
+                          <img src="${p.image}" class="w-full h-full object-cover">
+                          <div class="absolute top-2 left-2 bg-white/95 backdrop-blur-sm px-2 py-0.5 rounded shadow text-[10px] font-black text-emerald-500 flex items-center gap-1">
+                              <i class="fa-solid fa-store"></i> Abierto
+                          </div>
+                          <div class="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md text-white px-2 py-0.5 rounded-lg text-[10px] font-bold">
+                              📍 ${p.distance} km
+                          </div>
+                      </div>
+                      <div class="p-3 flex flex-col justify-between flex-grow">
+                          <h4 class="font-black text-slate-900 text-sm leading-tight mb-1 truncate">${p.name}</h4>
+                          <p class="text-[10px] text-slate-500 font-bold truncate">${p.location}</p>
+                      </div>
+                  </div>
+              `;
+              gridAll.innerHTML += cardAllHTML;
+          });
+      };
+
+      // Control de Vistas (Inicio vs Sección Eventos)
+      window.switchMainView = function(view) {
+          const homeView = document.getElementById('homeMainView');
+          const eventsView = document.getElementById('eventsSectionView');
+          
+          if(view === 'events') {
+              homeView.classList.add('hidden');
+              eventsView.classList.remove('hidden');
+              window.renderEventsPage();
+          } else {
+              eventsView.classList.add('hidden');
+              homeView.classList.remove('hidden');
+          }
+      };
+
+      window.renderEventsPage = function() {
+          const container = document.getElementById('eventsPageList');
+          if(!container) return;
+          container.innerHTML = '';
+
+          const eventsList = window.places.filter(p => p.category === 'event');
+          eventsList.forEach(ev => {
+              container.innerHTML += `
+                  <div class="bg-white rounded-3xl p-4 shadow-sm border border-orange-100 flex flex-col sm:flex-row gap-4 items-center">
+                      <img src="${ev.image}" class="w-full sm:w-48 h-40 object-cover rounded-2xl shadow">
+                      <div class="flex-grow space-y-2 text-center sm:text-left">
+                          <span class="bg-amber-100 text-amber-800 font-black text-[10px] px-2.5 py-1 rounded-lg uppercase">🎟️ Evento Destacado PZO</span>
+                          <h3 class="font-black text-lg text-slate-900">${ev.name}</h3>
+                          <p class="text-xs text-slate-500"><i class="fa-solid fa-calendar-days text-[#FF4B2B]"></i> ${ev.hours}</p>
+                          <p class="text-xs text-slate-600">${ev.description}</p>
+                          <div class="pt-2 flex flex-wrap gap-2 justify-center sm:justify-start">
+                              <a href="${ev.ticketUrl}" target="_blank" class="bg-brand-gradient text-white text-xs font-black px-5 py-2.5 rounded-xl shadow transition">Comprar Entradas</a>
+                              <button onclick="window.openModal(${ev.id})" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-extrabold px-4 py-2.5 rounded-xl transition">Ver Info y Extras</button>
+                          </div>
+                      </div>
+                  </div>
+              `;
           });
       };
 
@@ -173,48 +261,35 @@
           
           document.getElementById('modalImage').src = window.currentPlace.image;
           document.getElementById('modalTitle').innerText = window.currentPlace.name;
-          document.getElementById('modalCategorySub').innerText = window.currentPlace.category === 'food' ? 'Restaurante & Karaoke' : 'Comercio Local';
-          document.getElementById('modalStatusLive').innerText = "Abierto";
+          document.getElementById('modalCategorySub').innerText = window.currentPlace.category === 'event' ? 'Evento / Concierto' : 'Restaurante';
+          document.getElementById('modalStatusLive').innerText = "Disponible";
           document.getElementById('modalHoursLive').innerText = window.currentPlace.hours;
           document.getElementById('modalRatingText').innerText = `${window.currentPlace.rating} (${window.currentPlace.reviews} reviews)`;
           document.getElementById('modalDescription').innerText = window.currentPlace.description;
           document.getElementById('btnWhatsappHeader').href = `https://wa.me/${window.currentPlace.whatsapp}?text=Hola,%20vengo%20de%20goordaz`;
-          document.getElementById('btnCallHeader').href = `tel:+${window.currentPlace.whatsapp}`;
+          document.getElementById('btnCallHeader').href = `tel:+${window.currentPlace.phone}`;
           
           const menuTab = document.getElementById('tabMenu');
-          let popularHTML = window.currentPlace.menu.filter(m => m.img).map(m => `
-              <div onclick="window.scrollToProduct('${m.id}')" class="w-36 shrink-0 cursor-pointer group">
-                  <img src="${m.img}" class="w-full h-24 object-cover rounded-xl shadow-sm border border-slate-100 group-hover:scale-105 transition">
-                  <p class="font-bold text-slate-800 text-[11px] mt-1.5 truncate">${m.name}</p>
-                  <p class="text-[#FF4B2B] font-black text-xs">$${m.price.toFixed(2)}</p>
-              </div>
-          `).join('');
-          
-          let listHTML = window.currentPlace.menu.map(m => `
-              <div id="prod_${m.id}" class="bg-orange-50/40 border border-orange-100 p-3 rounded-2xl mb-2 flex justify-between items-center text-xs shadow-sm transition-all duration-500">
+          let listHTML = window.currentPlace.menu ? window.currentPlace.menu.map(m => `
+              <div id="prod_${m.id}" class="bg-orange-50/40 border border-orange-100 p-3 rounded-2xl mb-2 flex justify-between items-center text-xs shadow-sm">
                   <div class="pr-3">
                       <b class="text-slate-900 text-sm">${m.name}</b>
                       <p class="text-slate-500 text-[11px] mt-0.5 leading-tight">${m.desc || ''}</p>
                       <p class="text-[#FF4B2B] font-black text-sm mt-1">$${m.price.toFixed(2)} USD</p>
                   </div>
-                  <button onclick="window.addToCartItem('${m.id}', '${m.name}', ${m.price})" class="bg-brand-gradient text-white px-4 py-2.5 rounded-xl font-extrabold shadow-md shrink-0 active:scale-95 transition">+ Agregar</button>
+                  <button onclick="window.addToCartItem('${m.id}', '${m.name}', ${m.price})" class="bg-brand-gradient text-white px-4 py-2.5 rounded-xl font-extrabold shadow-md shrink-0">+ Agregar</button>
               </div>
-          `).join('');
+          `).join('') : '<p class="text-xs text-slate-400 text-center py-4">No hay ítems en preventa disponibles.</p>';
 
           menuTab.innerHTML = `
-              ${popularHTML ? `
-              <div class="mb-5">
-                  <h3 class="font-black text-slate-900 text-base mb-3">Platos Populares <span class="text-[10px] text-slate-400 font-normal">(Toca para ver detalles abajo)</span></h3>
-                  <div class="flex gap-3 overflow-x-auto scrollbar-none pb-2">${popularHTML}</div>
+              ${window.currentPlace.ticketUrl ? `
+              <div class="mb-4">
+                  <a href="${window.currentPlace.ticketUrl}" target="_blank" class="w-full bg-[#FF4B2B] hover:bg-orange-600 text-white font-black py-3.5 rounded-xl shadow transition text-sm flex items-center justify-center gap-2">
+                      <i class="fa-solid fa-ticket"></i> Comprar Entradas Oficiales
+                  </a>
               </div>` : ''}
-              
-              <div class="space-y-2 mb-6">
-                  <button onclick="document.getElementById('allProductsTitle').scrollIntoView({behavior: 'smooth'})" class="w-full bg-[#FF4B2B] hover:bg-orange-600 text-white font-black py-3.5 rounded-xl shadow-sm transition text-sm">Ver Menú Completo</button>
-                  <a href="https://wa.me/${window.currentPlace.whatsapp}?text=Hola,%20quisiera%20reservar%20una%20mesa" target="_blank" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold py-3.5 rounded-xl transition text-sm block text-center">Reservar Mesa / Cita</a>
-              </div>
-
-              <div class="pt-4 border-t border-slate-100">
-                  <h3 id="allProductsTitle" class="font-black text-slate-900 text-sm mb-3">Todos los Productos</h3>
+              <div class="pt-2">
+                  <h3 class="font-black text-slate-900 text-sm mb-3">Opciones / Entradas</h3>
                   ${listHTML}
               </div>
           `;
@@ -225,33 +300,18 @@
           document.getElementById('infoPhoneText').innerText = window.currentPlace.phone;
           document.getElementById('infoLocationText').innerText = window.currentPlace.location;
 
-          document.getElementById('reviewsScore').innerText = window.currentPlace.rating;
-          document.getElementById('reviewsCount').innerText = `Basado en más de ${window.currentPlace.reviews} reseñas reales`;
-          document.getElementById('googleReviewBtn').href = `https://search.google.com/local/reviews?placeid=ChIJkUeOsbb5y40Rm6vMKi59KvY`;
-
           document.getElementById('placeModal').classList.remove('hidden');
           window.switchModalTab('menu');
       };
 
       window.closeModal = function() { document.getElementById('placeModal').classList.add('hidden'); };
 
-      window.scrollToProduct = function(id) {
-          const el = document.getElementById('prod_' + id);
-          if(el) {
-              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              el.classList.add('ring-4', 'ring-[#FF4B2B]', 'bg-orange-100', 'shadow-lg', 'scale-[1.02]');
-              setTimeout(() => {
-                  el.classList.remove('ring-4', 'ring-[#FF4B2B]', 'bg-orange-100', 'shadow-lg', 'scale-[1.02]');
-              }, 2200);
-          }
-      };
-
       window.cart = [];
       window.cartPlace = null;
 
       window.addToCartItem = function(id, name, price) {
           if(window.cart.length > 0 && window.cartPlace.id !== window.currentPlace.id) {
-              if(confirm(`Tienes un pedido pendiente en ${window.cartPlace.name}.\n\n¿Vaciar carrito para pedir aquí?`)) { window.cart = []; } else { return; }
+              if(confirm(`Tienes un pedido pendiente en ${window.cartPlace.name}.\n\n¿Vaciar carrito?`)) { window.cart = []; } else { return; }
           }
           window.cartPlace = window.currentPlace;
           let existing = window.cart.find(i => i.id === id);
@@ -330,7 +390,7 @@
           <div class="flex items-center gap-2">
               <div class="w-10 h-10 bg-brand-gradient rounded-full flex items-center justify-center text-white text-xl font-black shadow-md">g</div>
               <div class="flex flex-col">
-                  <div class="flex items-baseline cursor-pointer">
+                  <div onclick="window.switchMainView('home')" class="flex items-baseline cursor-pointer">
                       <span class="text-2xl font-black tracking-tighter text-[#FF4B2B] leading-none">go</span>
                       <span class="text-2xl font-extrabold tracking-tight text-slate-900 leading-none">ordaz</span>
                       <span class="w-1.5 h-1.5 rounded-full bg-amber-400 ml-0.5"></span>
@@ -346,38 +406,18 @@
       </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 mt-5 space-y-6">
+  <!-- VISTA PRINCIPAL (INICIO) -->
+  <main id="homeMainView" class="max-w-7xl mx-auto px-4 mt-5 space-y-6">
       
-      <!-- CARRUSEL ESTILO YUMMY (BANNERS LATERALES & EVENTO SANLUIS) -->
+      <!-- CARRUSEL DE EVENTOS PRÓXIMOS (¡Puesto de primero antes de Cerca de ti!) -->
       <div>
-          <h2 class="text-base font-black text-slate-900 mb-3">🔥 Próximos Eventos & Patrocinados</h2>
-          <div class="flex gap-4 overflow-x-auto scrollbar-none pb-2">
-              <!-- Banner Evento SanLuis -->
-              <a href="https://tickets.vibraproductions.com/sanluis-puertoordaz-202611212000" target="_blank" class="shrink-0 w-72 h-40 rounded-3xl overflow-hidden relative shadow-md group block border border-orange-100">
-                  <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                  <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex flex-col justify-end p-4 text-white">
-                      <span class="bg-amber-400 text-slate-900 font-black text-[9px] px-2 py-0.5 rounded-md w-max mb-1">🎟️ 21 NOV • CLUB ÍTALO</span>
-                      <h3 class="font-black text-sm leading-tight">SanLuis en Puerto Ordaz</h3>
-                      <p class="text-[10px] text-slate-300">Aunque Sea Todo World Tour • Entradas aquí</p>
-                  </div>
-              </a>
-
-              <!-- Banner Patrocinado B2B -->
-              <div class="shrink-0 w-72 h-40 rounded-3xl bg-brand-gradient p-5 text-white flex flex-col justify-between shadow-md relative overflow-hidden">
-                  <div class="absolute -right-6 -bottom-6 opacity-10 text-8xl font-black">🔥</div>
-                  <div>
-                      <span class="bg-black/20 text-amber-300 font-black text-[9px] px-2 py-0.5 rounded-md uppercase">Patrocinado B2B</span>
-                      <h3 class="font-black text-base mt-1">¡Impulsa tu negocio!</h3>
-                      <p class="text-[11px] text-orange-100">Posiciónate frente a miles en PZO.</p>
-                  </div>
-                  <button onclick="alert('Portal de registro pronto')" class="bg-white text-[#FF4B2B] text-xs font-black py-2 px-4 rounded-xl w-max shadow">Publicar mi Negocio</button>
-              </div>
-          </div>
+          <h2 class="text-base font-black text-slate-900 mb-3">🎟️ Próximos Eventos en PZO</h2>
+          <div id="eventsCarouselContainer" class="flex gap-4 overflow-x-auto scrollbar-none pb-2"></div>
       </div>
 
       <!-- CATEGORÍAS -->
       <div class="flex gap-4 overflow-x-auto scrollbar-none pb-2">
-          <div class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group w-20">
+          <div onclick="window.switchMainView('events')" class="flex flex-col items-center gap-2 shrink-0 cursor-pointer group w-20">
               <div class="w-16 h-16 bg-[#FFFBEB] rounded-[20px] flex items-center justify-center text-2xl shadow-sm border border-amber-100 group-hover:scale-105 transition text-amber-500">🔥</div>
               <span class="text-[11px] font-black text-slate-700">Eventos</span>
           </div>
@@ -402,7 +442,7 @@
       <!-- BARRA DE BÚSQUEDA -->
       <div class="relative">
           <span class="absolute inset-y-0 left-0 flex items-center pl-5 text-[#FF4B2B]"><i class="fa-solid fa-magnifying-glass"></i></span>
-          <input type="text" placeholder="Busca La Sonata, hoteles o hamburguesas..." class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold shadow-sm focus:outline-none focus:border-[#FF4B2B] transition placeholder-slate-400">
+          <input type="text" placeholder="Busca La Sonata, SanLuis o hamburguesas..." class="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold shadow-sm focus:outline-none focus:border-[#FF4B2B] transition placeholder-slate-400">
       </div>
 
       <!-- CARRUSEL: CERCA DE TI -->
@@ -421,15 +461,24 @@
       </div>
   </main>
 
+  <!-- VISTA DE SECCIÓN DE EVENTOS -->
+  <main id="eventsSectionView" class="max-w-7xl mx-auto px-4 mt-5 space-y-6 hidden">
+      <div class="flex items-center justify-between mb-4">
+          <h1 class="text-2xl font-black text-slate-900">🎟️ Cartelera de Eventos en PZO</h1>
+          <button onclick="window.switchMainView('home')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-xs px-4 py-2 rounded-xl transition">← Volver al Inicio</button>
+      </div>
+      <div id="eventsPageList" class="space-y-4"></div>
+  </main>
+
   <!-- BARRA DE NAVEGACIÓN INFERIOR -->
   <nav class="fixed bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md border border-slate-100 py-3 px-6 z-40 max-w-lg mx-auto rounded-[30px] shadow-2xl flex justify-around items-center">
-      <button class="flex flex-col items-center text-[#FF4B2B] gap-1 group">
+      <button onclick="window.switchMainView('home')" class="flex flex-col items-center text-[#FF4B2B] gap-1 group">
           <i class="fa-solid fa-house text-lg group-hover:scale-110 transition"></i><span class="text-[9px] font-black uppercase">Inicio</span>
       </button>
-      <button onclick="alert('Eventos y Boletería activa en el banner superior')" class="flex flex-col items-center text-slate-400 hover:text-[#FF4B2B] gap-1 group transition">
+      <button onclick="window.switchMainView('events')" class="flex flex-col items-center text-slate-400 hover:text-[#FF4B2B] gap-1 group transition">
           <i class="fa-solid fa-ticket text-lg group-hover:scale-110 transition"></i><span class="text-[9px] font-black uppercase">Eventos</span>
       </button>
-      <button class="flex flex-col items-center text-slate-400 hover:text-[#FF4B2B] gap-1 group transition">
+      <button onclick="alert('Mapa interactivo habilitado')" class="flex flex-col items-center text-slate-400 hover:text-[#FF4B2B] gap-1 group transition">
           <i class="fa-solid fa-map-location-dot text-lg group-hover:scale-110 transition"></i><span class="text-[9px] font-black uppercase">Mapa</span>
       </button>
       <button onclick="window.openCheckoutModal()" class="flex flex-col items-center text-slate-400 hover:text-[#FF4B2B] gap-1 group relative transition">
@@ -451,20 +500,17 @@
                   <img id="modalImage" src="" class="w-full h-full object-cover">
                   <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent"></div>
                   <div class="absolute bottom-4 left-5 right-5 text-white">
-                      
                       <div class="flex flex-wrap items-center gap-2 text-[11px] font-extrabold text-slate-300 mb-1.5">
                           <span class="text-amber-400 font-extrabold">$$</span>
                           <span>•</span>
-                          <span id="modalCategorySub" class="uppercase tracking-wider">Restaurante</span>
+                          <span id="modalCategorySub" class="uppercase tracking-wider">Comercio</span>
                           <span>•</span>
                           <span class="text-emerald-400 flex items-center gap-1 font-bold">
-                              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <span id="modalStatusLive">Abierto</span>
+                              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> <span id="modalStatusLive">Disponible</span>
                           </span>
                       </div>
-
                       <h2 id="modalTitle" class="text-2xl font-black text-white drop-shadow-lg leading-tight mb-1">Nombre</h2>
                       <p class="text-[12px] font-semibold text-slate-300 mb-2" id="modalHoursLive">Horario</p>
-
                       <div class="flex items-center gap-2">
                           <span class="text-[#FF4B2B] text-sm drop-shadow"><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i></span>
                           <span class="text-xs font-bold text-slate-200" id="modalRatingText">4.9 (342 reviews)</span>
@@ -482,7 +528,7 @@
                   <p id="modalDescription" class="text-[13px] text-slate-600 font-medium leading-relaxed mb-6"></p>
 
                   <div class="flex gap-6 border-b border-slate-200 text-sm font-extrabold px-1">
-                      <button id="btnTabMenu" onclick="window.switchModalTab('menu')" class="pb-3 border-b-[3px] border-[#FF4B2B] text-slate-900 transition-colors">Catálogo / Menú</button>
+                      <button id="btnTabMenu" onclick="window.switchModalTab('menu')" class="pb-3 border-b-[3px] border-[#FF4B2B] text-slate-900 transition-colors">Menú / Entradas</button>
                       <button id="btnTabInfo" onclick="window.switchModalTab('info')" class="pb-3 text-slate-400 hover:text-slate-600 transition-colors">Info / Ubicación</button>
                       <button id="btnTabReviews" onclick="window.switchModalTab('reviews')" class="pb-3 text-slate-400 hover:text-slate-600 transition-colors">Opiniones</button>
                   </div>
@@ -493,7 +539,7 @@
                       <div class="bg-white rounded-3xl border border-slate-100 p-1 shadow-sm">
                           <div class="flex items-center justify-between p-4 border-b border-slate-50">
                               <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center"><i class="fa-regular fa-clock"></i></div>
-                              <div><p class="text-[10px] font-black text-slate-400 uppercase">Horario</p><p class="text-xs font-bold text-slate-800" id="infoHours"></p></div></div>
+                              <div><p class="text-[10px] font-black text-slate-400 uppercase">Horario / Fecha</p><p class="text-xs font-bold text-slate-800" id="infoHours"></p></div></div>
                           </div>
                           <a id="infoInstaLink" href="#" target="_blank" class="flex items-center justify-between p-4 border-b border-slate-50">
                               <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-pink-50 text-pink-500 flex items-center justify-center"><i class="fa-brands fa-instagram"></i></div>
@@ -512,12 +558,12 @@
                   </div>
 
                   <div id="tabReviews" class="mt-5 animate-slide-up hidden py-8 px-4 text-center bg-white rounded-3xl border border-slate-100 shadow-sm">
-                      <h3 id="reviewsScore" class="text-5xl font-black text-slate-900 mb-2">4.9</h3>
+                      <h3 class="text-5xl font-black text-slate-900 mb-2">4.9</h3>
                       <div class="flex justify-center items-center gap-1 text-[#FF4B2B] text-xl mb-1">
                           <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
                       </div>
-                      <p id="reviewsCount" class="text-xs font-bold text-slate-500 mb-6">Basado en reseñas de Google</p>
-                      <a id="googleReviewBtn" href="#" target="_blank" class="w-full bg-white border border-slate-200 shadow-sm hover:shadow text-slate-700 font-extrabold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-3">
+                      <p class="text-xs font-bold text-slate-500 mb-6">Basado en reseñas de Google</p>
+                      <a href="https://search.google.com/local/reviews?placeid=ChIJkUeOsbb5y40Rm6vMKi59KvY" target="_blank" class="w-full bg-white border border-slate-200 shadow-sm hover:shadow text-slate-700 font-extrabold py-3.5 rounded-xl transition text-sm flex items-center justify-center gap-3">
                           Ver y dejar opiniones en Google
                       </a>
                   </div>
