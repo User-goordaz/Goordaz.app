@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Goordaz | Toda Puerto ordaz en un toque</title>
-    
+    <title>Goordaz App</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Plus Jakarta Sans -->
@@ -19,17 +18,8 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                    },
-                    colors: {
-                        goordaz: {
-                            red: '#FF3B30',
-                            orange: '#FF6B00',
-                            dark: '#0F172A',
-                            card: '#1E293B'
-                        }
-                    }
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { goordaz: { red: '#FF3B30', orange: '#FF6B00', dark: '#0F172A', card: '#1E293B' } }
                 }
             }
         }
@@ -39,1052 +29,761 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         .brand-gradient { background: linear-gradient(135deg, #FF3B30 0%, #FF6B00 100%); }
         #leafletMap { height: 180px; width: 100%; border-radius: 1rem; z-index: 10; }
+        .modal-scroll-lock { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+        .ticket-bg { background-image: repeating-linear-gradient(0deg, transparent, transparent 10px, #f3f4f6 10px, #f3f4f6 11px); }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased pb-24 selection:bg-orange-500 selection:text-white">
+<body class="bg-[#f8fafc]">
 
-    <!-- CONTENEDOR CENTRAL: Simetría móvil / PC -->
-    <div class="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative overflow-x-hidden border-x border-slate-200">
-        
-        <!-- HEADER PRINCIPAL -->
-        <header class="bg-white/95 backdrop-blur-md shadow-sm border-b border-orange-100/60 sticky top-0 z-40 px-4 py-3">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
+<!-- CONTENEDOR PRINCIPAL RESPONSIVO -->
+<div class="max-w-2xl mx-auto bg-white min-h-screen shadow-2xl relative overflow-x-hidden border-x border-slate-200 pb-24">
+    
+    <!-- HEADER -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md px-4 py-3 border-b border-slate-100 flex justify-between items-center">
         <div class="flex items-center gap-2">
-            <!-- Tu logo real de Goordaz insertado correctamente -->
             <img src="Goordaz_Logo.png" alt="Goordaz" class="w-10 h-10 object-contain scale-[1.2]">
-            
-            <div class="flex flex-col">
-                <div class="flex items-baseline cursor-pointer">
-                    <span class="text-2xl font-black tracking-tighter text-[#FF4B2B] leading-none">go</span>
-                    <span class="text-2xl font-extrabold tracking-tight text-slate-900 leading-none">ordaz</span>
+            <div>
+                <div class="flex items-baseline">
+                    <span class="text-xl font-black tracking-tighter text-[#FF3B30]">go</span>
+                    <span class="text-xl font-extrabold tracking-tight text-slate-900">ordaz</span>
                     <span class="w-1.5 h-1.5 rounded-full bg-amber-400 ml-0.5"></span>
                 </div>
-                <button class="text-[10px] font-bold text-slate-500 flex items-center gap-1 hover:text-[#FF4B2B] transition mt-0.5">
-                    <i class="fa-solid fa-location-dot text-[#FF4B2B]"></i> PZO (Alta Vista) <i class="fa-solid fa-chevron-down text-[8px]"></i>
+                <button onclick="toggleLocationModal(true)" class="flex items-center gap-1 text-[11px] font-bold text-slate-500 hover:text-orange-600 transition">
+                    <i class="fa-solid fa-location-dot text-[#FF6B00]"></i>
+                    <span id="currentLocationLabel" class="truncate max-w-[150px]">PZO (Alta Vista)</span>
+                    <i class="fa-solid fa-chevron-down text-[9px]"></i>
                 </button>
             </div>
         </div>
-        <div class="w-10 h-10 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-500 shadow-sm cursor-pointer hover:bg-amber-100 transition">
-            <i class="fa-solid fa-star text-sm"></i>
+        <div class="flex items-center gap-1.5">
+            <button onclick="requestAccurateGPS()" class="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200 text-[#FF6B00] flex items-center justify-center text-xs active:scale-95 transition" title="Usar GPS">
+                <i class="fa-solid fa-crosshairs"></i>
+            </button>
+            <div class="bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-xl text-[10px] font-black text-slate-700">
+                BCV: <span id="bcvRateHeader">883.40</span> Bs
+            </div>
+        </div>
+    </header>
+
+    <!-- BUSCADOR -->
+    <div class="px-4 pt-3 pb-2">
+        <div class="relative">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-orange-500 text-sm"></i>
+            <input type="text" id="globalSearchInput" onkeyup="handleGlobalSearch()" placeholder="¿Qué te provoca hoy en Puerto Ordaz?" class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 transition shadow-inner">
         </div>
     </div>
-</header>
 
-        <!-- BUSCADOR PRINCIPAL (TAXONOMÍAS) -->
-        <div class="px-4 pt-3 pb-2">
+    <!-- TAXONOMÍAS -->
+    <div class="flex gap-3 overflow-x-auto no-scrollbar px-4 py-2">
+        <div onclick="filterByTaxonomy('all')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-lg shadow-sm border border-slate-200 hover:scale-105 transition">✨</div>
+            <span class="text-[10px] font-bold text-slate-700">Todos</span>
+        </div>
+        <div onclick="filterByTaxonomy('food')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-lg shadow-sm border border-amber-200 hover:scale-105 transition">🍔</div>
+            <span class="text-[10px] font-bold text-slate-700">Comida</span>
+        </div>
+        <div onclick="filterByTaxonomy('cafe')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-lg shadow-sm border border-purple-200 hover:scale-105 transition">☕</div>
+            <span class="text-[10px] font-bold text-slate-700">Café</span>
+        </div>
+        <div onclick="filterByTaxonomy('hotel')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-lg shadow-sm border border-blue-200 hover:scale-105 transition">🏨</div>
+            <span class="text-[10px] font-bold text-slate-700">Hoteles</span>
+        </div>
+        <div onclick="filterByTaxonomy('gym')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-lg shadow-sm border border-orange-200 hover:scale-105 transition">🏋️</div>
+            <span class="text-[10px] font-bold text-slate-700">Gimnasios</span>
+        </div>
+        <div onclick="filterByTaxonomy('health')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-lg shadow-sm border border-emerald-200 hover:scale-105 transition">💊</div>
+            <span class="text-[10px] font-bold text-slate-700">Salud</span>
+        </div>
+    </div>
+
+    <!-- BANNER SANLUIS & B2B -->
+    <section class="p-4 pt-2">
+        <div class="relative rounded-3xl overflow-hidden shadow-lg bg-slate-900 text-white min-h-[160px] flex flex-col justify-end p-4 border border-slate-800 mb-3">
+            <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=700&q=80" alt="Concierto SanLuis" class="absolute inset-0 w-full h-full object-cover opacity-40">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+            <div class="relative z-10 space-y-1">
+                <div class="flex items-center gap-2">
+                    <span class="bg-[#FF3B30] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">Evento de Gran Categoría</span>
+                    <span class="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[9px] font-bold px-2 py-0.5 rounded-md">15 Noviembre</span>
+                </div>
+                <h2 class="text-lg font-black leading-tight tracking-tight">SanLuis: Tour Ilusionista 2026</h2>
+                <div class="pt-1 flex items-center justify-between">
+                    <span class="text-xs font-bold text-amber-400">Entradas desde $35</span>
+                    <a href="https://tickets.vibraproductions.com/sanluis-puertoordaz-202611212000" target="_blank" class="bg-white text-slate-900 text-[11px] font-extrabold px-3 py-1 rounded-xl">Reservar →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1">
+            <div class="min-w-[270px] brand-gradient rounded-2xl p-4 text-white shadow-md flex justify-between items-center shrink-0">
+                <div class="space-y-1 max-w-[170px]">
+                    <span class="bg-black/20 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">0% Comisiones</span>
+                    <h4 class="text-sm font-black leading-tight">Sin Intermediarios</h4>
+                    <p class="text-[10px] text-orange-100 leading-tight">Publica tu menú y recibe pedidos directos a tu WhatsApp.</p>
+                </div>
+                <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl shadow-inner"><i class="fa-solid fa-store"></i></div>
+            </div>
+            <div class="min-w-[270px] bg-slate-900 rounded-2xl p-4 text-white shadow-md flex justify-between items-center shrink-0 border border-slate-800">
+                <div class="space-y-1 max-w-[170px]">
+                    <span class="bg-amber-400/20 text-amber-300 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">Lanzamiento</span>
+                    <h4 class="text-sm font-black leading-tight">30 Días de Prueba Gratis</h4>
+                    <p class="text-[10px] text-slate-400 leading-tight">Incluye acrílicos QR para tus mesas y vitrina digital.</p>
+                </div>
+                <div class="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center text-2xl text-amber-400 border border-slate-700"><i class="fa-solid fa-crown"></i></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIONES -->
+    <section id="sec-food" class="carousel-section px-4 py-3">
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-utensils text-[#FF6B00] text-sm"></i><h3 class="text-xs font-black text-slate-900">Dónde Comer en PZO</h3></div>
+        </div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="foodCarouselContainer"></div>
+    </section>
+
+    <section id="sec-cafe" class="carousel-section px-4 py-3">
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-mug-hot text-purple-600 text-sm"></i><h3 class="text-xs font-black text-slate-900">Cafés & Repostería</h3></div>
+        </div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="cafeCarouselContainer"></div>
+    </section>
+
+    <section id="sec-hotel" class="carousel-section px-4 py-3">
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-hotel text-blue-600 text-sm"></i><h3 class="text-xs font-black text-slate-900">Hoteles y Posadas</h3></div>
+        </div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="hotelCarouselContainer"></div>
+    </section>
+
+    <section id="sec-gym" class="carousel-section px-4 py-3">
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-dumbbell text-amber-600 text-sm"></i><h3 class="text-xs font-black text-slate-900">Gimnasios y Fitness</h3></div>
+        </div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="gymCarouselContainer"></div>
+    </section>
+
+    <section id="sec-health" class="carousel-section px-4 py-3">
+        <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-1.5"><i class="fa-solid fa-pills text-emerald-600 text-sm"></i><h3 class="text-xs font-black text-slate-900">Salud y Farmacias</h3></div>
+        </div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="healthCarouselContainer"></div>
+    </section>
+
+    <!-- EVENTOS -->
+    <section id="sec-events" class="px-4 py-3 mb-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-black text-slate-900 tracking-tight">Próximos Eventos en Guayana</h3>
+            <span class="text-[10px] font-bold text-slate-400">Cartelera PZO</span>
+        </div>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="eventsContainer"></div>
+    </section>
+
+    <!-- BARRA INFERIOR -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200 py-2.5 px-6 flex justify-around items-center z-40">
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center gap-0.5 text-[#FF3B30]">
+            <i class="fa-solid fa-house text-lg"></i><span class="text-[9px] font-bold">Inicio</span>
+        </button>
+        <button onclick="toggleLocationModal(true)" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition">
+            <i class="fa-solid fa-map-location-dot text-lg"></i><span class="text-[9px] font-semibold">Zonas</span>
+        </button>
+        <button onclick="openCartModal()" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition relative">
             <div class="relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-orange-500 text-sm"></i>
-                <input type="text" id="globalSearchInput" onkeyup="handleGlobalSearch()" placeholder="¿Qué te provoca hoy en Puerto Ordaz?" class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-2.5 pl-10 pr-4 text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-orange-500 transition shadow-inner">
+                <i class="fa-solid fa-basket-shopping text-lg"></i>
+                <span id="cartCountBadge" class="hidden absolute -top-1 -right-2 bg-orange-600 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">0</span>
             </div>
+            <span class="text-[9px] font-semibold">Mi Pedido</span>
+        </button>
+        <a href="#" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-emerald-600 transition">
+            <i class="fa-brands fa-whatsapp text-lg"></i><span class="text-[9px] font-semibold">Contacto</span>
+        </a>
+    </nav>
+
+    <!-- MODAL ZONAS -->
+    <div id="locationModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl modal-scroll-lock">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div><h4 class="font-black text-sm text-slate-900">Seleccionar Ubicación</h4><p class="text-[10px] text-slate-400">Calcula la distancia y tarifa</p></div>
+                <button onclick="toggleLocationModal(false)" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center"><i class="fa-solid fa-xmark text-xs"></i></button>
+            </div>
+            <button onclick="requestAccurateGPS(); toggleLocationModal(false);" class="w-full brand-gradient text-white font-extrabold text-xs py-2.5 px-3 rounded-2xl shadow-md"><i class="fa-solid fa-crosshairs"></i> Usar GPS Real</button>
+            <input type="text" id="zonePredictiveInput" onkeyup="handleZoneInput(this.value)" placeholder="Escribe tu sector (Ej: Chilemex, Olivos...)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-3 pr-3 text-xs focus:outline-none focus:border-orange-500">
+            <div id="zoneSuggestionsList" class="max-h-48 overflow-y-auto space-y-1 divide-y divide-slate-50"></div>
         </div>
-
-        <!-- TAXONOMÍAS GLOBALES (Comida, Café, Tiendas, Salud, Servicios, Gimnasios) -->
-        <div class="flex gap-3 overflow-x-auto no-scrollbar px-4 py-2">
-            <div onclick="filterByTaxonomy('all')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
-                <div class="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center text-lg shadow-sm border border-slate-200 hover:scale-105 transition">✨</div>
-                <span class="text-[10px] font-bold text-slate-700">Todos</span>
-            </div>
-            <div onclick="filterByTaxonomy('food')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
-                <div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-lg shadow-sm border border-amber-200 hover:scale-105 transition">🍔</div>
-                <span class="text-[10px] font-bold text-slate-700">Comida</span>
-            </div>
-            <div onclick="filterByTaxonomy('cafe')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
-                <div class="w-12 h-12 rounded-2xl bg-purple-50 flex items-center justify-center text-lg shadow-sm border border-purple-200 hover:scale-105 transition">☕</div>
-                <span class="text-[10px] font-bold text-slate-700">Café</span>
-            </div>
-            <div onclick="filterByTaxonomy('gym')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
-                <div class="w-12 h-12 rounded-2xl bg-orange-50 flex items-center justify-center text-lg shadow-sm border border-orange-200 hover:scale-105 transition">🏋️</div>
-                <span class="text-[10px] font-bold text-slate-700">Gimnasios</span>
-            </div>
-            <div onclick="filterByTaxonomy('shop')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
-                <div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-lg shadow-sm border border-blue-200 hover:scale-105 transition">🛍️</div>
-                <span class="text-[10px] font-bold text-slate-700">Tiendas</span>
-            </div>
-            <div onclick="filterByTaxonomy('health')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
-                <div class="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-lg shadow-sm border border-emerald-200 hover:scale-105 transition">💊</div>
-                <span class="text-[10px] font-bold text-slate-700">Salud</span>
-            </div>
-            <div onclick="filterByTaxonomy('services')" class="flex flex-col items-center gap-1 cursor-pointer shrink-0">
-                <div class="w-12 h-12 rounded-2xl bg-yellow-50 flex items-center justify-center text-lg shadow-sm border border-yellow-200 hover:scale-105 transition">✂️</div>
-                <span class="text-[10px] font-bold text-slate-700">Servicios</span>
-            </div>
-        </div>
-
-        <!-- 1. BANNER PRINCIPAL DE GRAN CATEGORÍA (SanLuis) -->
-        <section class="p-4 pt-2">
-            <div class="relative rounded-3xl overflow-hidden shadow-lg bg-slate-900 text-white min-h-[160px] flex flex-col justify-end p-4 border border-slate-800">
-                <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=700&q=80" alt="Concierto SanLuis" class="absolute inset-0 w-full h-full object-cover opacity-40">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-                
-                <div class="relative z-10 space-y-1">
-                    <div class="flex items-center gap-2">
-                        <span class="bg-[#FF3B30] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">Evento de Gran Categoría</span>
-                        <span class="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[9px] font-bold px-2 py-0.5 rounded-md">15 Noviembre</span>
-                    </div>
-                    <h2 class="text-lg font-black leading-tight tracking-tight">SanLuis: Tour Ilusionista 2026</h2>
-                    <p class="text-[11px] text-slate-300 flex items-center gap-1.5">
-                        <i class="fa-solid fa-location-dot text-amber-400"></i> Centro Italo Venezolano de Guayana
-                    </p>
-                    <div class="pt-1 flex items-center justify-between">
-                        <span class="text-xs font-bold text-amber-400">Entradas desde $35</span>
-                        <a href="https://wa.me/584129413934?text=Hola,%20quiero%20información%20de%20entradas%20para%20el%20concierto%20de%20SanLuis" target="_blank" class="bg-white text-slate-900 hover:bg-slate-100 text-[11px] font-extrabold px-3 py-1 rounded-xl shadow transition flex items-center gap-1">
-                            Reservar <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 2. BANNERS B2B DESLIZANTES: (0% Comisiones & Prueba 30 Días) -->
-        <section class="px-4 pb-2">
-            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1">
-                <!-- Tarjeta B2B 1 -->
-                <div class="min-w-[270px] brand-gradient rounded-2xl p-4 text-white shadow-md flex justify-between items-center shrink-0">
-                    <div class="space-y-1 max-w-[170px]">
-                        <span class="bg-black/20 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">0% Comisiones</span>
-                        <h4 class="text-sm font-black leading-tight">Sin Intermediarios</h4>
-                        <p class="text-[10px] text-orange-100 leading-tight">Publica tu menú y recibe pedidos directos a tu WhatsApp.</p>
-                        <a href="https://wa.me/584129413934?text=Hola,%20quiero%20publicar%20mi%20negocio%20en%20Goordaz%20sin%20comisiones" target="_blank" class="inline-block mt-1 bg-white text-slate-900 text-[10px] font-black px-2.5 py-1 rounded-xl shadow-sm">
-                            Vender en Goordaz →
-                        </a>
-                    </div>
-                    <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center text-2xl shadow-inner">
-                        <i class="fa-solid fa-store"></i>
-                    </div>
-                </div>
-
-                <!-- Tarjeta B2B 2 -->
-                <div class="min-w-[270px] bg-slate-900 rounded-2xl p-4 text-white shadow-md flex justify-between items-center shrink-0 border border-slate-800">
-                    <div class="space-y-1 max-w-[170px]">
-                        <span class="bg-amber-400/20 text-amber-300 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">Lanzamiento</span>
-                        <h4 class="text-sm font-black leading-tight">30 Días de Prueba Gratis</h4>
-                        <p class="text-[10px] text-slate-400 leading-tight">Incluye acrílicos QR para tus mesas y vitrina digital.</p>
-                        <a href="https://wa.me/584129413934?text=Hola,%20quiero%20activar%20los%2030%20días%20gratis%20para%20mi%20local" target="_blank" class="inline-block mt-1 bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-1 rounded-xl shadow-sm">
-                            Empezar Prueba →
-                        </a>
-                    </div>
-                    <div class="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center text-2xl text-amber-400 border border-slate-700">
-                        <i class="fa-solid fa-crown"></i>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- 3. SECCIÓN CARRUSEL: RESTAURANTES Y DÓNDE COMER -->
-        <section class="px-4 py-3">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-1.5">
-                    <i class="fa-solid fa-utensils text-[#FF6B00] text-sm"></i>
-                    <h3 class="text-xs font-black text-slate-900 tracking-tight">Dónde Comer en PZO</h3>
-                </div>
-                <span class="text-[10px] font-bold text-orange-600">Ver todos</span>
-            </div>
-            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="foodCarouselContainer">
-                <!-- Inyectado por JS -->
-            </div>
-        </section>
-
-        <!-- 4. SECCIÓN CARRUSEL: HOTELES Y ALOJAMIENTOS -->
-        <section class="px-4 py-3">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-1.5">
-                    <i class="fa-solid fa-hotel text-blue-600 text-sm"></i>
-                    <h3 class="text-xs font-black text-slate-900 tracking-tight">Hoteles y Posadas</h3>
-                </div>
-                <span class="text-[10px] font-bold text-blue-600">Ver todos</span>
-            </div>
-            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="hotelCarouselContainer">
-                <!-- Inyectado por JS -->
-            </div>
-        </section>
-
-        <!-- 5. SECCIÓN CARRUSEL: GIMNASIOS Y DEPORTES -->
-        <section class="px-4 py-3">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-1.5">
-                    <i class="fa-solid fa-dumbbell text-amber-600 text-sm"></i>
-                    <h3 class="text-xs font-black text-slate-900 tracking-tight">Gimnasios y Fitness</h3>
-                </div>
-                <span class="text-[10px] font-bold text-amber-600">Ver todos</span>
-            </div>
-            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="gymCarouselContainer">
-                <!-- Inyectado por JS -->
-            </div>
-        </section>
-
-        <!-- 6. CARRUSEL INFERIOR DE EVENTOS Y VIDA NOCTURNA -->
-        <section class="px-4 py-3 mb-6">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center gap-1.5">
-                    <i class="fa-solid fa-calendar-star text-amber-500 text-sm"></i>
-                    <h3 class="text-xs font-black text-slate-900 tracking-tight">Próximos Eventos en Guayana</h3>
-                </div>
-                <span class="text-[10px] font-bold text-slate-400">Cartelera PZO</span>
-            </div>
-            <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="eventsContainer">
-                <!-- Inyectado por JS -->
-            </div>
-        </section>
-
-        <!-- BARRA DE NAVEGACIÓN INFERIOR (Estilo App Nativa) -->
-        <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200 py-2.5 px-6 flex justify-around items-center z-40">
-            <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center gap-0.5 text-[#FF3B30]">
-                <i class="fa-solid fa-house text-lg"></i>
-                <span class="text-[9px] font-bold">Inicio</span>
-            </button>
-            <button onclick="toggleLocationModal(true)" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition">
-                <i class="fa-solid fa-map-location-dot text-lg"></i>
-                <span class="text-[9px] font-semibold">Zonas</span>
-            </button>
-            <button onclick="openCartModal()" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-slate-600 transition relative">
-                <div class="relative">
-                    <i class="fa-solid fa-basket-shopping text-lg"></i>
-                    <span id="cartCountBadge" class="hidden absolute -top-1 -right-2 bg-orange-600 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center">0</span>
-                </div>
-                <span class="text-[9px] font-semibold">Mi Pedido</span>
-            </button>
-            <a href="https://wa.me/584129413934?text=Hola,%20quiero%20información%20sobre%20Goordaz" target="_blank" class="flex flex-col items-center gap-0.5 text-slate-400 hover:text-emerald-600 transition">
-                <i class="fa-brands fa-whatsapp text-lg"></i>
-                <span class="text-[9px] font-semibold">Contacto</span>
-            </a>
-        </nav>
-
-        <!-- ============================================================== -->
-        <!-- MODAL 1: SELECTOR DE ZONAS PREDICTIVO (PZO)                    -->
-        <!-- ============================================================== -->
-        <div id="locationModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-opacity">
-            <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-sm w-full p-5 space-y-4 shadow-2xl">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                    <div>
-                        <h4 class="font-black text-sm text-slate-900">Seleccionar Ubicación</h4>
-                        <p class="text-[10px] text-slate-400">Calcula la distancia y tarifa real de entrega</p>
-                    </div>
-                    <button onclick="toggleLocationModal(false)" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center">
-                        <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
-                </div>
-
-                <button onclick="requestAccurateGPS(); toggleLocationModal(false);" class="w-full brand-gradient text-white font-extrabold text-xs py-2.5 px-3 rounded-2xl flex items-center justify-center gap-2 shadow-md active:scale-95 transition">
-                    <i class="fa-solid fa-crosshairs"></i> Usar mi Ubicación Actual (GPS Real)
-                </button>
-
-                <div class="relative">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-                    <input type="text" id="zonePredictiveInput" onkeyup="handleZoneInput(this.value)" placeholder="Escribe tu sector (Ej: Chilemex, Olivos, Unare...)" class="w-full bg-slate-50 border border-slate-200 rounded-xl py-2 pl-9 pr-3 text-xs focus:outline-none focus:border-orange-500">
-                </div>
-
-                <div id="zoneSuggestionsList" class="max-h-48 overflow-y-auto space-y-1 divide-y divide-slate-50"></div>
-            </div>
-        </div>
-
-        <!-- ============================================================== -->
-        <!-- MODAL 2: FICHA INMERSIVA DE COMERCIO (Estilo Yelp/Goordaz)     -->
-        <!-- ============================================================== -->
-        <div id="restaurantModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-            <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl relative">
-                
-                <!-- PORTADA INMERSIVA CON DEGRADADO -->
-                <div class="relative h-56 bg-slate-900 shrink-0">
-                    <img id="modalCoverImg" src="" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-                    
-                    <!-- Botón de bajar / cerrar ficha -->
-                    <button onclick="closeRestaurantModal()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-md active:scale-95 transition">
-                        <i class="fa-solid fa-chevron-down text-sm"></i>
-                    </button>
-
-                    <!-- Badges y Título sobre la portada -->
-                    <div class="absolute bottom-3 left-4 right-4 text-white space-y-1">
-                        <div class="flex items-center gap-2 text-[10px] font-bold">
-                            <span class="text-amber-400">$$</span> • 
-                            <span class="uppercase tracking-wider" id="modalBadgeCategory">RESTAURANTE</span> • 
-                            <span class="text-emerald-400 flex items-center gap-1"><i class="fa-solid fa-circle text-[7px]"></i> Disponible</span>
-                        </div>
-                        <h3 id="modalRestName" class="text-xl font-black leading-tight drop-shadow">La Sonata Restaurant & Karaoke</h3>
-                        <p id="modalRestHours" class="text-[11px] text-slate-300 font-medium">Jue a Dom • 12:00 PM a 1:00 AM</p>
-                        <div class="flex items-center gap-1.5 text-xs text-amber-400 font-bold pt-0.5">
-                            <span>⭐⭐⭐⭐⭐</span>
-                            <span id="modalRatingText" class="text-white text-[11px]">4.9 (342 reviews)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CONTENIDO CON SCROLL INTERNO -->
-                <div class="flex-1 overflow-y-auto p-4 space-y-4">
-                    
-                    <!-- BARRA DE ACCIONES RÁPIDAS (3 Botones) -->
-                    <div class="grid grid-cols-3 gap-2 text-xs font-bold">
-                        <button onclick="alert('¡Gracias por apoyar el comercio local en Puerto Ordaz! La función de calificación se abrirá en Google.')" class="bg-[#FF3B30] text-white py-2.5 rounded-xl flex items-center justify-center gap-1.5 shadow-sm active:scale-95 transition">
-                            <i class="fa-solid fa-star text-xs"></i> Valorar
-                        </button>
-                        <a id="btnActionWhatsapp" href="#" target="_blank" class="bg-white border border-slate-200 text-slate-700 py-2.5 rounded-xl flex items-center justify-center gap-1.5 hover:bg-slate-50 active:scale-95 transition">
-                            <i class="fa-brands fa-whatsapp text-emerald-500 text-sm"></i> WhatsApp
-                        </a>
-                        <a id="btnActionCall" href="#" class="bg-white border border-slate-200 text-slate-700 py-2.5 rounded-xl flex items-center justify-center gap-1.5 hover:bg-slate-50 active:scale-95 transition">
-                            <i class="fa-solid fa-phone text-blue-500 text-xs"></i> Llamar
-                        </a>
-                    </div>
-
-                    <!-- DESCRIPCIÓN DEL LOCAL -->
-                    <p id="modalRestDesc" class="text-xs text-slate-600 leading-relaxed">
-                        Una propuesta que combina gastronomía con música en vivo. Disfruta de carnes a la parrilla, pastas y hamburguesas.
-                    </p>
-
-                    <!-- PESTAÑAS PRINCIPALES DE NAVEGACIÓN (Menú, Info/Ubicación, Opiniones) -->
-                    <div class="border-b border-slate-200 flex text-xs font-bold text-slate-400">
-                        <button onclick="switchMainTab('menu')" id="tabBtn-menu" class="pb-2.5 px-3 border-b-2 border-[#FF3B30] text-slate-900">Menú / Platos</button>
-                        <button onclick="switchMainTab('info')" id="tabBtn-info" class="pb-2.5 px-3 border-b-2 border-transparent hover:text-slate-700">Info / Ubicación</button>
-                        <button onclick="switchMainTab('reviews')" id="tabBtn-reviews" class="pb-2.5 px-3 border-b-2 border-transparent hover:text-slate-700">Opiniones</button>
-                    </div>
-
-                    <!-- PESTAÑA 1: CONTENIDO MENÚ / PLATOS -->
-                    <div id="tabContent-menu" class="space-y-3">
-                        <!-- Sub-Pestañas Segmentadas (Pizzas, Parrillas, etc.) -->
-                        <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="menuSubTabsContainer"></div>
-                        <!-- Lista de Platos -->
-                        <div class="space-y-2.5" id="menuDishesContainer"></div>
-                    </div>
-
-                    <!-- PESTAÑA 2: CONTENIDO INFO / UBICACIÓN -->
-                    <div id="tabContent-info" class="hidden space-y-3">
-                        <!-- Tarjetas de Información -->
-                        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3 text-xs">
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-regular fa-clock"></i>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Horario / Fecha</span>
-                                    <span id="infoScheduleText" class="font-bold text-slate-800">Jue a Dom • 12:00 PM a 1:00 AM</span>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-brands fa-instagram"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Instagram Oficial</span>
-                                    <a id="infoInstagramLink" href="#" target="_blank" class="font-bold text-slate-800 hover:text-orange-600 flex items-center justify-between">
-                                        <span id="infoInstagramText">@lasonatarest.pzo</span>
-                                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-                                    <i class="fa-solid fa-phone"></i>
-                                </div>
-                                <div>
-                                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Teléfono de Contacto</span>
-                                    <span id="infoPhoneText" class="font-bold text-slate-800">0412-9413934</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tarjeta de Ubicación con Mapa Leaflet -->
-                        <div class="bg-white border border-slate-200 rounded-2xl p-3.5 space-y-2">
-                            <div>
-                                <h4 class="font-black text-xs text-slate-900">Ubicación</h4>
-                                <p id="infoAddressText" class="text-[11px] text-slate-500 font-medium">Orinokia Mall, Plaza Caroní</p>
-                            </div>
-                            <div id="leafletMap"></div>
-                        </div>
-                    </div>
-
-                    <!-- PESTAÑA 3: CONTENIDO OPINIONES (Google Reviews Style) -->
-                    <div id="tabContent-reviews" class="hidden space-y-4">
-                        <div class="bg-white border border-slate-200 rounded-2xl p-6 text-center space-y-2">
-                            <span class="text-4xl font-black text-slate-900" id="reviewScoreBig">4.9</span>
-                            <div class="text-amber-400 text-sm">⭐⭐⭐⭐⭐</div>
-                            <p class="text-xs text-slate-500 font-semibold">Basado en reseñas de Google</p>
-                            <div class="pt-2">
-                                <a id="btnGoogleReviews" href="https://maps.google.com" target="_blank" class="inline-block w-full border border-slate-300 hover:bg-slate-50 text-slate-800 font-extrabold text-xs py-2.5 rounded-xl shadow-sm transition">
-                                    Ver y dejar opiniones en Google
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-        </div>
-
-        <!-- ============================================================== -->
-        <!-- MODAL 3: CARRITO DE PEDIDO Y PAGO MÓVIL                        -->
-        <!-- ============================================================== -->
-        <div id="cartModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-            <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h-[85vh] flex flex-col overflow-hidden shadow-2xl">
-                
-                <div class="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <div>
-                        <h4 class="font-black text-sm text-slate-900 flex items-center gap-1.5">
-                            <i class="fa-solid fa-basket-shopping text-orange-600"></i> Mi Pedido
-                        </h4>
-                        <p id="cartRestNameHeader" class="text-[10px] text-slate-500 font-bold">Sin local seleccionado</p>
-                    </div>
-                    <button onclick="closeCartModal()" class="w-7 h-7 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center">
-                        <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
-                </div>
-
-                <!-- Lista de Ítems en el Carrito -->
-                <div id="cartItemsContainer" class="p-4 overflow-y-auto flex-1 space-y-2.5 divide-y divide-slate-100"></div>
-
-                <!-- Resumen de Costos y Pago Móvil -->
-                <div class="p-4 bg-slate-50 border-t border-slate-200 space-y-3">
-                    <div class="space-y-1 text-xs">
-                        <div class="flex justify-between text-slate-500">
-                            <span>Subtotal Platos:</span>
-                            <span id="cartSubtotalText" class="font-bold text-slate-800">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-slate-500">
-                            <span class="flex items-center gap-1"><i class="fa-solid fa-motorcycle text-emerald-600"></i> Delivery Calculado:</span>
-                            <span id="cartDeliveryText" class="font-bold text-slate-800">$0.00</span>
-                        </div>
-                        <div class="flex justify-between text-sm font-black text-slate-900 pt-1 border-t border-slate-200">
-                            <span>Total a Pagar:</span>
-                            <div class="text-right">
-                                <div id="cartTotalUSD" class="text-[#FF3B30]">$0.00 USD</div>
-                                <div id="cartTotalVES" class="text-[10px] text-slate-400 font-bold">0.00 Bs (Tasa BCV)</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Datos de Pago Móvil del Restaurante -->
-                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[11px] space-y-1 text-slate-700">
-                        <span class="font-bold text-amber-900 block flex items-center gap-1">
-                            <i class="fa-solid fa-mobile-screen-button"></i> Datos de Pago Móvil:
-                        </span>
-                        <div id="cartPagoMovilData" class="font-semibold text-slate-600">
-                            Banco: Banesco (0134) • RIF: J-40819283-1 • Tlf: 0412-9413934
-                        </div>
-                    </div>
-
-                    <!-- Campo para número de referencia -->
-                    <input type="text" id="orderReferenceInput" placeholder="Nro de referencia de pago móvil (Opcional)" class="w-full bg-white border border-slate-300 rounded-xl py-2 px-3 text-xs focus:outline-none focus:border-orange-500">
-
-                    <!-- Botón Enviar a WhatsApp -->
-                    <button onclick="sendOrderToWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs py-3 rounded-2xl flex items-center justify-center gap-2 shadow-md active:scale-95 transition">
-                        <i class="fa-brands fa-whatsapp text-base"></i> Enviar Pedido por WhatsApp
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
     </div>
 
-    <!-- ============================================================== -->
-    <!-- MOTOR JAVASCRIPT: HAVERSINE, GPS, CARRITO MONOLOCAL Y MAPA     -->
-    <!-- ============================================================== -->
-    <script>
-        // TASA BCV DEL DÍA
-        const BCV_RATE = 883.40;
-        document.getElementById("bcvRateHeader").innerText = BCV_RATE.toFixed(2);
+    <!-- MODAL FICHA -->
+    <div id="restaurantModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl relative modal-scroll-lock">
+            <div class="relative h-60 bg-slate-900 shrink-0">
+                <img id="modalCoverImg" src="" class="w-full h-full object-cover">
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                <button onclick="closeRestaurantModal()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-[#FF6B00] text-white flex items-center justify-center shadow-lg"><i class="fa-solid fa-chevron-down text-sm"></i></button>
+                <button onclick="openGalleryModal()" class="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[10px] font-extrabold px-3 py-1.5 rounded-full"><i class="fa-solid fa-images text-amber-400"></i> Fotos</button>
 
-        // 1. BASE DE DATOS DE SECTORES EN PUERTO ORDAZ Y SAN FÉLIX
-        const PZO_SECTORS = [
-            { id: "av_norte", name: "Alta Vista Norte", type: "Comercial", lat: 8.2980, lng: -62.7330 },
-            { id: "av_sur", name: "Alta Vista Sur", type: "Residencial", lat: 8.2915, lng: -62.7310 },
-            { id: "orinokia", name: "Orinokia Mall", type: "Mall", lat: 8.2933, lng: -62.7395 },
-            { id: "los_olivos", name: "Los Olivos", type: "Residencial", lat: 8.2849, lng: -62.7142 },
-            { id: "chilemex", name: "Chilemex", type: "Residencial", lat: 8.2910, lng: -62.7230 },
-            { id: "villa_asia", name: "Villa Asia", type: "Residencial", lat: 8.2940, lng: -62.7250 },
-            { id: "unare_1", name: "Unare I", type: "Sector", lat: 8.2791, lng: -62.7515 },
-            { id: "unare_2", name: "Unare II", type: "Sector", lat: 8.2735, lng: -62.7607 },
-            { id: "san_felix", name: "San Félix (Centro)", type: "Comercial", lat: 8.3676, lng: -62.6510 }
-        ];
+                <div class="absolute bottom-3 left-4 right-4 text-white flex items-end gap-3 z-10">
+                    <div class="w-14 h-14 rounded-2xl bg-white p-1 shadow-lg shrink-0 border-2 border-white/90 overflow-hidden">
+                        <img id="modalLogoImg" src="" class="w-full h-full object-cover rounded-xl bg-black">
+                    </div>
+                    <div class="space-y-0.5 flex-1 min-w-0">
+                        <span class="uppercase text-amber-400 text-[10px] font-bold truncate" id="modalBadgeCategory"></span>
+                        <h3 id="modalRestName" class="text-base font-black leading-tight drop-shadow truncate">Nombre</h3>
+                        <p id="modalRestHours" class="text-[10px] text-slate-300 font-medium truncate"></p>
+                        <div class="flex items-center gap-1 text-[11px] text-amber-400 font-bold"><span>⭐⭐⭐⭐⭐</span> <span id="modalRatingText" class="text-white text-[10px]"></span></div>
+                    </div>
+                </div>
+            </div>
 
-        // 2. BASE DE DATOS DE LOCALES (Restaurantes, Hoteles, Gimnasios)
-        const PLACES = [
-            {
-                id: "sonata",
-                type: "food",
-                name: "La Sonata Restaurant & Karaoke",
-                categoryText: "Pizzas, Pastas y Parrillas",
-                locationText: "Orinokia Mall, Plaza Caroní",
-                lat: 8.29329385355705,
-                lng: -62.739520501485615,
-                rating: 4.9,
-                reviews: 342,
-                image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=600&q=80",
-                description: "Una propuesta que combina gastronomía con música en vivo. Disfruta de carnes a la parrilla, pastas y hamburguesas.",
-                whatsapp: "584129413934",
-                phone: "0412-9413934",
-                instagram: "@lasonatarest.pzo",
-                hours: "Jue a Dom • 12:00 PM a 1:00 AM",
-                pagoMovil: "Banesco (0134) • RIF: J-40819283-1 • 0412-9413934",
-                menu: [
-                    { category: "entradas", name: "Delicia Sonata", desc: "Melocotón, tomates confitados con jamón curado, reducción balsámica y almendras", price: 14.00 },
-                    { category: "entradas", name: "Carpaccio de Lomito", desc: "Lomito finamente rebanado, parmesano y pesto artesanal", price: 14.50 },
-                    { category: "pizzas", name: "Pizza Sonata Especial", desc: "Salsa pomodoro, mozzarella fresca, tocineta y maíz", price: 10.50 },
-                    { category: "parrillas", name: "Parrilla Mixta Sonata", desc: "Solomo, pollo, chorizo y papas rústicas", price: 18.00 },
-                    { category: "bebidas", name: "Té Frío de la Casa (16oz)", desc: "Refrescante con limón natural", price: 2.00 }
-                ]
-            },
-            {
-                id: "kuadrito",
-                type: "food",
-                name: "Er Kuadrito Burger",
-                categoryText: "Hamburguesas y Fast Food",
-                locationText: "Alta Vista Sur",
-                lat: 8.2915,
-                lng: -62.7310,
-                rating: 4.9,
-                reviews: 890,
-                image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80",
-                description: "Las hamburguesas y pepitos más icónicos de Puerto Ordaz. Sabor guayanés puro.",
-                whatsapp: "584129413934",
-                phone: "0412-9413934",
-                instagram: "@erkuadrito",
-                hours: "Lun a Dom • 5:00 PM a 11:30 PM",
-                pagoMovil: "Mercantil (0105) • CI: 18.992.334 • 0412-9413934",
-                menu: [
-                    { category: "hamburguesas", name: "La Kuadrito Especial", desc: "Carne, pollo, chuleta, tocineta y queso guayanés", price: 6.50 },
-                    { category: "hamburguesas", name: "Pepito Mixto (30cm)", desc: "Gratinado con queso fundido y papas ralladas", price: 8.00 },
-                    { category: "bebidas", name: "Refresco 355ml", desc: "Lata fría variada", price: 1.50 }
-                ]
-            },
-            {
-                id: "civeta",
-                type: "cafe",
-                name: "Cafetería Civeta",
-                categoryText: "Café, Desayunos y Pastelería",
-                locationText: "Los Olivos",
-                lat: 8.2849,
-                lng: -62.7142,
-                rating: 4.7,
-                reviews: 198,
-                image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80",
-                description: "El punto favorito en Los Olivos para pastelería artesanal, cafés de especialidad y desayunos gourmet.",
-                whatsapp: "584129413934",
-                phone: "0412-9413934",
-                instagram: "@civeta.ve",
-                hours: "Lun a Sáb • 7:30 AM a 8:00 PM",
-                pagoMovil: "Banesco (0134) • J-50182934-2 • 0412-9413934",
-                menu: [
-                    { category: "desayunos", name: "Panquecas Civeta", desc: "Esponjosas con sirope, tocineta y huevos revueltos", price: 6.00 },
-                    { category: "desayunos", name: "Omelette Clásico", desc: "Relleno de jamón, mozzarella y vegetales frescos", price: 5.00 },
-                    { category: "cafeteria", name: "Cappuccino Italiano", desc: "Espresso doble con leche cremada y canela", price: 2.50 }
-                ]
-            },
-            {
-                id: "eurobuilding",
-                type: "hotel",
-                name: "Hotel Eurobuilding Guayana",
-                categoryText: "Alojamiento 5 Estrellas & Eventos",
-                locationText: "Alta Vista Norte",
-                lat: 8.2980,
-                lng: -62.7330,
-                rating: 4.8,
-                reviews: 420,
-                image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-                description: "El hotel insignia de la ciudad con piscina, restaurantes de lujo y salones corporativos.",
-                whatsapp: "584129413934",
-                phone: "0286-7131111",
-                instagram: "@eurobuildingpzo",
-                hours: "Abierto 24 Horas",
-                pagoMovil: "Banesco (0134) • J-00293481-0 • 0412-9413934",
-                menu: [
-                    { category: "estadias", name: "Habitación Standard (Noche)", desc: "Cama King, desayuno incluido y acceso a piscina", price: 95.00 },
-                    { category: "estadias", name: "Suite Ejecutiva (Noche)", desc: "Vista al río Caroní con sala privada", price: 140.00 }
-                ]
-            },
-            {
-                id: "iron_gym",
-                type: "gym",
-                name: "Iron Fitness Gym PZO",
-                categoryText: "Musculación, Crossfit & Cardio",
-                locationText: "Alta Vista Sur",
-                lat: 8.2920,
-                lng: -62.7290,
-                rating: 4.9,
-                reviews: 160,
-                image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=600&q=80",
-                description: "Instalaciones de alto rendimiento con entrenadores certificados, área funcional y suplementación.",
-                whatsapp: "584129413934",
-                phone: "0412-9413934",
-                instagram: "@ironfitness.pzo",
-                hours: "Lun a Vie • 6:00 AM a 9:00 PM",
-                pagoMovil: "Banesco (0134) • CI: 19.349.120 • 0412-9413934",
-                menu: [
-                    { category: "planes", name: "Pase Diario Completo", desc: "Acceso libre a pesas y cardio por un día", price: 3.50 },
-                    { category: "planes", name: "Membresía Mensual Full", desc: "Entrenamiento ilimitado + rutina guiada", price: 35.00 }
-                ]
-            }
-        ];
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 modal-scroll-lock" id="restaurantModalScrollableBody">
+                <div class="grid grid-cols-3 gap-2 text-xs font-bold">
+                    <button class="bg-[#FF3B30] text-white py-2.5 rounded-xl"><i class="fa-solid fa-star"></i> Valorar</button>
+                    <a id="btnActionWhatsapp" target="_blank" class="bg-white border border-slate-200 text-slate-700 py-2.5 rounded-xl text-center"><i class="fa-brands fa-whatsapp text-emerald-500"></i> WhatsApp</a>
+                    <a id="btnActionCall" class="bg-white border border-slate-200 text-slate-700 py-2.5 rounded-xl text-center"><i class="fa-solid fa-phone text-blue-500"></i> Llamar</a>
+                </div>
+                <p id="modalRestDesc" class="text-xs text-slate-600 leading-relaxed"></p>
 
-        // 3. BASE DE DATOS DE EVENTOS
-        const EVENTS = [
-            { title: "Noche Acústica de Rock", place: "Monalisa Bar, Alta Vista", date: "Viernes 24 Oct", price: "Entrada Libre", icon: "fa-guitar" },
-            { title: "Stand Up: Noche de Risas", place: "Hotel Rosa Bela", date: "Sábado 25 Oct", price: "$10 Entrada", icon: "fa-microphone" },
-            { title: "Torneo de Padel Guayana", place: "Cancha Padel PZO", date: "Domingo 26 Oct", price: "Gratis público", icon: "fa-trophy" }
-        ];
+                <div class="border-b border-slate-200 flex text-xs font-bold text-slate-400">
+                    <button onclick="switchMainTab('menu')" id="tabBtn-menu" class="pb-2.5 px-3 border-b-2 border-[#FF3B30] text-slate-900">Menú / Platos</button>
+                    <button onclick="switchMainTab('info')" id="tabBtn-info" class="pb-2.5 px-3 border-b-2 border-transparent">Info / Ubicación</button>
+                </div>
 
-        // TARIFAS DE DELIVERY
-        const TARIFA_MINIMA = 1.50;
-        const COSTO_POR_KM = 0.50;
+                <div id="tabContent-menu" class="space-y-3">
+                    <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="menuSubTabsContainer"></div>
+                    <div class="space-y-2.5" id="menuDishesContainer"></div>
+                </div>
 
-        // UBICACIÓN ACTIVA DEL USUARIO
-        let currentUserLocation = {
-            name: "PZO (Alta Vista)",
-            lat: 8.2980,
-            lng: -62.7330
-        };
+                <div id="tabContent-info" class="hidden space-y-3">
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3 text-xs">
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><i class="fa-regular fa-clock"></i></div><div><span class="text-[10px] text-slate-400 font-bold uppercase block">Horario</span><span id="infoScheduleText" class="font-bold text-slate-800"></span></div></div>
+                        <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center shrink-0"><i class="fa-brands fa-instagram"></i></div><div class="flex-1"><span class="text-[10px] text-slate-400 font-bold uppercase block">Instagram</span><a id="infoInstagramLink" target="_blank" class="font-bold text-slate-800"><span id="infoInstagramText"></span></a></div></div>
+                    </div>
+                    <div class="bg-white border border-slate-200 rounded-2xl p-3.5 space-y-2">
+                        <h4 class="font-black text-xs text-slate-900">Ubicación</h4><p id="infoAddressText" class="text-[11px] text-slate-500"></p>
+                        <div id="leafletMap"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        // ESTADO DEL CARRITO MONOLOCAL
-        let currentCartRestaurant = null; // Objeto del restaurante activo
-        let cartItems = [];               // Lista de platos seleccionados
+    <!-- MODAL GALERÍA -->
+    <div id="galleryModal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex flex-col justify-between p-4 transition-opacity">
+        <div class="flex justify-between items-center text-white pb-2 border-b border-white/10">
+            <h4 class="font-extrabold text-sm" id="galleryPlaceNameTitle">Galería</h4>
+            <button onclick="closeGalleryModal()" class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="flex-1 flex items-center overflow-x-auto no-scrollbar gap-4 py-4" id="galleryPhotosSlider"></div>
+    </div>
 
-        // ==============================================================
-        // MATEMÁTICA: HAVERSINE Y TARIFAS
-        // ==============================================================
-        function calculateHaversineKM(lat1, lon1, lat2, lon2) {
-            const R = 6371; // Radio de la Tierra en km
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = 
-                Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-                Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
+    <!-- TICKET CHECKOUT MONOCROMÁTICO -->
+    <div id="cartModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-2xl max-w-md w-full h-[90vh] sm:h-auto sm:max-h-[90vh] flex flex-col relative shadow-2xl font-mono ticket-bg text-black overflow-hidden modal-scroll-lock">
+            <button onclick="closeCartModal()" class="absolute right-4 top-4 w-8 h-8 bg-gray-200 text-gray-800 rounded-full flex items-center justify-center font-sans font-bold z-10">✕</button>
+
+            <div class="overflow-y-auto p-6 flex-grow no-scrollbar">
+                <div class="text-center mb-6 border-b-2 border-dashed border-gray-300 pb-4">
+                    <h2 class="text-2xl font-black uppercase tracking-widest">TICKET DE ORDEN</h2>
+                    <p class="text-sm font-bold text-gray-500 mt-1" id="orderNumber"></p>
+                </div>
+
+                <div class="mb-6">
+                    <p class="font-bold text-xs uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">Comercio Asociado</p>
+                    <p id="cartRestNameHeader" class="text-sm font-bold text-slate-800"></p>
+                    <p id="cartPagoMovilData" class="text-[10px] text-slate-500 mt-1"></p>
+                </div>
+
+                <div class="mb-6">
+                    <p class="font-bold text-xs uppercase text-gray-500 mb-2 border-b border-gray-200 pb-1">Tu Pedido</p>
+                    <div id="cartItemsContainer" class="space-y-2"></div>
+                </div>
+
+                <div class="space-y-4 mb-6">
+                    <p class="font-bold text-xs uppercase text-gray-500 border-b border-gray-200 pb-1">Datos del Cliente</p>
+                    <input type="text" id="cNombre" placeholder="Nombre y Apellido" class="w-full border border-gray-300 rounded p-2 text-sm focus:border-black">
+                    <input type="tel" id="cTelefono" placeholder="Teléfono de Contacto (Ej. 0414...)" class="w-full border border-gray-300 rounded p-2 text-sm focus:border-black">
+                    
+                    <div class="bg-gray-100 p-3 rounded border border-gray-200">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold uppercase">Distancia GPS:</span>
+                            <span id="cartDistanceBadge" class="text-xs font-black bg-black text-white px-2 py-0.5 rounded">0.0 km</span>
+                        </div>
+                        <textarea id="cDireccion" placeholder="Dirección exacta para el delivery..." class="w-full border border-gray-300 rounded p-2 text-sm h-16 focus:border-black"></textarea>
+                    </div>
+
+                    <div>
+                        <p class="font-bold text-xs uppercase text-gray-500 mb-2 mt-4">Método de Pago</p>
+                        <select id="cMetodoPago" class="w-full border border-gray-300 rounded p-2 text-sm font-bold focus:border-black bg-white">
+                            <option value="Pago Movil">📱 Pago Móvil (Bs)</option>
+                            <option value="Efectivo">💵 Efectivo ($)</option>
+                            <option value="Zelle">🟣 Zelle</option>
+                            <option value="Binance">🟡 Binance Pay</option>
+                        </select>
+                    </div>
+                    <input type="text" id="orderReferenceInput" placeholder="Nro de referencia (Si es Pago Móvil)" class="w-full border border-gray-300 rounded p-2 text-sm focus:border-black">
+                </div>
+
+                <div class="border-t-2 border-dashed border-gray-300 pt-4 mb-4">
+                    <div class="flex justify-between text-sm mb-1 text-gray-600"><span>Subtotal:</span><span id="cartSubtotalText">$0.00</span></div>
+                    <div class="flex justify-between text-sm mb-2 text-gray-600"><span>Delivery (Tarifa auto):</span><span id="cartDeliveryText">$0.00</span></div>
+                    <div class="flex justify-between items-end mt-2">
+                        <span class="text-xl font-black">TOTAL:</span>
+                        <div class="text-right">
+                            <div id="cartTotalUSD" class="text-xl font-black text-[#FF3B30]">$0.00</div>
+                            <div id="cartTotalVES" class="text-xs text-gray-500 font-bold">0.00 Bs</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center text-xs font-bold text-gray-400 mt-6 pb-4">Gracias por usar Goordaz ⚡</div>
+            </div>
+            <div class="p-4 bg-white border-t border-gray-200">
+                <button onclick="sendOrderToWhatsApp()" class="w-full bg-black text-white font-black py-4 rounded-xl text-lg flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-xl"></i> Enviar Pedido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const BCV_RATE = 883.40; document.getElementById("bcvRateHeader").innerText = BCV_RATE.toFixed(2);
+
+    const PZO_SECTORS = [
+        { name: "Alta Vista Norte", type: "Comercial", lat: 8.2980, lng: -62.7330 },
+        { name: "Alta Vista Sur", type: "Residencial", lat: 8.2915, lng: -62.7310 },
+        { name: "Villa Alianza", type: "Residencial", lat: 8.3000, lng: -62.7100 },
+        { name: "Orinokia Mall", type: "Mall", lat: 8.2933, lng: -62.7395 },
+        { name: "Los Olivos", type: "Residencial", lat: 8.2849, lng: -62.7142 },
+        { name: "Chilemex", type: "Residencial", lat: 8.2910, lng: -62.7230 },
+        { name: "Unare I", type: "Sector", lat: 8.2791, lng: -62.7515 }
+    ];
+
+    const PLACES = [
+        {
+            id: "terrazabox", type: "gym", name: "Terraza Box", categoryText: "Crossfit, Musculación y Funcionales", locationText: "Villa Alianza",
+            lat: 8.3000, lng: -62.7100, rating: 4.8, reviews: 320,
+            image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=700",
+            logo: "https://scontent-mia3-1.cdninstagram.com/v/t51.2885-19/848043102_18134157071506198_2913280879499840840_n.jpg?_nc_ht=scontent-mia3-1.cdninstagram.com&_nc_cat=104&_nc_ohc=W9oP50r3kHwQ7kNvgHTwQ7F&edm=AL-3X8kBAAAA&ccb=7-5&ig_cache_key=MzI2NzE5OTU5NTIzMTk5MDExNg%3D%3D.2-ccb7-5&oh=00_AYCH_A8Oq14N1g4_sE9F2T6R4V4-Y4I1U6R7sN6G2V4Z5w&oe=66E1C44F&_nc_sid=2d28f8",
+            gallery: ["https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800"],
+            description: "Un box de atletas para nuevos atletas. Crossfit, musculación y funcionales.",
+            whatsapp: "584128623330", phone: "0412-8623330", instagram: "@terraza.box", hours: "Lun a Sáb • 6:00 AM a 8:00 PM",
+            pagoMovil: "Banesco (0134) • J-12345678-9 • 0412-8623330",
+            menu: [{ category: "planes", name: "Plan Mensual Crossfit", desc: "Acceso ilimitado a clases guiadas", price: 40.00 }]
+        },
+        {
+            id: "eddysburger", type: "food", name: "Eddy's Burger", categoryText: "Hamburguesas Artesanales", locationText: "Alta Vista",
+            lat: 8.2950, lng: -62.7300, rating: 4.9, reviews: 512,
+            image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=700",
+            logo: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=150",
+            gallery: ["https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800"],
+            description: "Hamburguesas jugosas con carne 100% de res.",
+            whatsapp: "584120000000", phone: "0412-0000000", instagram: "@eddysburger", hours: "Mar a Dom • 5:00 PM a 11:00 PM",
+            pagoMovil: "Banesco • V-00000000 • 0412-0000000",
+            menu: [{ category: "hamburguesas", name: "La Eddy's Clásica", desc: "Doble carne, queso cheddar y tocineta", price: 7.50 }]
+        },
+        {
+            id: "monalisa", type: "food", name: "Monalisa Restobar", categoryText: "Gastronomía & Coctelería", locationText: "Alta Vista",
+            lat: 8.2940, lng: -62.7320, rating: 4.8, reviews: 240,
+            image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=700",
+            logo: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=150",
+            gallery: ["https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800"],
+            description: "Ambiente nocturno exclusivo, cocteles de autor y excelentes cenas.",
+            whatsapp: "584120000000", phone: "0412-0000000", instagram: "@monalisapzo", hours: "Mié a Sáb • 6:00 PM a 2:00 AM",
+            pagoMovil: "Mercantil • J-00000000 • 0412-0000000",
+            menu: [{ category: "cenas", name: "Lomito en Reducción de Vino", desc: "Acompañado de puré trufado", price: 16.00 }]
+        },
+        {
+            id: "sonata", type: "food", name: "La Sonata Restaurant & Karaoke", categoryText: "Pizzas, Ensaladas y Café", locationText: "Orinokia Mall, Plaza Caroní",
+            lat: 8.2932, lng: -62.7395, rating: 4.9, reviews: 342,
+            image: "https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=700&q=80",
+            logo: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=150&q=80",
+            gallery: ["https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800"],
+            description: "Gastronomía y música en vivo. Disfruta de ensaladas frescas, cafés de especialidad, postres y pizzas.",
+            whatsapp: "584129413934", phone: "0412-9413934", instagram: "@lasonatarest.pzo", hours: "Jue a Dom • 12:00 PM a 1:00 AM",
+            pagoMovil: "Banesco (0134) • RIF: J-40819283-1 • 0412-9413934",
+            menu: [
+                { category: "entradas", name: "Delicia Sonata", desc: "Melocotón, tomates confitados con jamón curado, reducción balsámica y almendras", price: 14.00 },
+                { category: "entradas", name: "Carpaccio de Lomito", desc: "Lomito finamente rebanado, parmesano y pesto artesanal", price: 14.50 },
+                { category: "ensaladas", name: "Ensalada César Clásica", desc: "Versión acústica y fresca para limpiar el paladar", price: 7.80 },
+                { category: "ensaladas", name: "Ensalada César con Pollo al Grill", desc: "Lechuga crujiente, aderezo César y pollo jugoso", price: 11.60 },
+                { category: "ensaladas", name: "Ensalada César con Camarones", desc: "Con frescos camarones salteados", price: 15.00 },
+                { category: "ensaladas", name: "Ensalada Sonata (Con Pollo)", desc: "Composición insignia con tomate confitado, repollos, pimentón, parmesano y reducción de aceto", price: 10.00 },
+                { category: "ensaladas", name: "Ensalada Sonata (Con Camarones)", desc: "Nuestra composición insignia con camarones frescos", price: 12.90 },
+                { category: "pizzas", name: "Pizza Sonata Especial", desc: "Salsa pomodoro, mozzarella fresca, tocineta y maíz", price: 10.50 },
+                { category: "cafe", name: "Espresso", desc: "Café corto italiano", price: 1.50 },
+                { category: "cafe", name: "Espresso Doble", desc: "Doble carga de energía", price: 2.50 },
+                { category: "cafe", name: "Café con Leche", desc: "Clásico y espumoso", price: 2.50 },
+                { category: "cafe", name: "Americano", desc: "Suave y aromático", price: 1.50 },
+                { category: "cafe", name: "Guayoyo", desc: "Pasado tradicional guayanés", price: 1.00 },
+                { category: "cafe", name: "Capuccino", desc: "Con leche cremada y toque de cacao", price: 2.25 },
+                { category: "cafe", name: "Latte de Vainilla", desc: "Café con leche y jarabe de vainilla", price: 2.75 },
+                { category: "cafe", name: "Mocaccino", desc: "Con chocolate y leche cremada", price: 3.50 },
+                { category: "cafe", name: "Frappuccino", desc: "Café helado batido", price: 5.00 },
+                { category: "postres", name: "Malteada de Chocolate", desc: "Cremosa y fría", price: 6.00 },
+                { category: "postres", name: "Porción de Torta", desc: "Delicia repostera del día", price: 1.50 },
+                { category: "postres", name: "Brownie con Helado", desc: "Brownie tibio con bola de helado de vainilla", price: 7.60 },
+                { category: "postres", name: "Helado Sonata", desc: "Creación especial de la casa", price: 4.00 },
+                { category: "postres", name: "Copa de Helado", desc: "Helado artesanal", price: 2.00 }
+            ]
+        },
+        {
+            id: "kuadrito", type: "food", name: "Er Kuadrito Burger", categoryText: "Hamburguesas y Fast Food", locationText: "Alta Vista Sur",
+            lat: 8.2915, lng: -62.7310, rating: 4.9, reviews: 890,
+            image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=700&q=80",
+            logo: "https://images.unsplash.com/photo-1586190848861-99aa4a171e90?auto=format&fit=crop&w=150&q=80",
+            gallery: ["https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800"],
+            description: "Las hamburguesas y pepitos más icónicos de Puerto Ordaz.",
+            whatsapp: "584129413934", phone: "0412-9413934", instagram: "@erkuadrito", hours: "Lun a Dom • 5:00 PM a 11:30 PM",
+            pagoMovil: "Mercantil (0105) • CI: 18.992.334 • 0412-9413934",
+            menu: [{ category: "hamburguesas", name: "La Kuadrito Especial", desc: "Carne, pollo, tocineta y queso guayanés", price: 6.50 }]
+        },
+        {
+            id: "civeta", type: "cafe", name: "Cafetería Civeta", categoryText: "Café, Desayunos y Pastelería", locationText: "Los Olivos",
+            lat: 8.2849, lng: -62.7142, rating: 4.7, reviews: 198,
+            image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=700&q=80",
+            logo: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=150&q=80",
+            gallery: ["https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800"],
+            description: "Pastelería artesanal, cafés de especialidad y desayunos gourmet.",
+            whatsapp: "584129413934", phone: "0412-9413934", instagram: "@civeta.ve", hours: "Lun a Sáb • 7:30 AM a 8:00 PM",
+            pagoMovil: "Banesco (0134) • J-50182934-2 • 0412-9413934",
+            menu: [{ category: "desayunos", name: "Panquecas Civeta", desc: "Esponjosas con sirope y tocineta", price: 6.00 }]
+        },
+        {
+            id: "portofino", type: "hotel", name: "Hotel Portofino Plaza", categoryText: "Hotel 4 estrellas", locationText: "Puerto Ordaz",
+            lat: 8.2850, lng: -62.7330, rating: 4.2, reviews: 262,
+            image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=700",
+            logo: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=150",
+            gallery: ["https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"],
+            description: "Wi-Fi gratis, Desayuno pago, Estacionamiento gratuito, Accesible, Aire acondicionado.",
+            whatsapp: "584120000000", phone: "0286-1234567", instagram: "@portofinoplaza", hours: "Abierto 24 Horas",
+            pagoMovil: "Provincial • J-00000000 • 0412-0000000",
+            menu: [{ category: "habitaciones", name: "Habitación Matrimonial", desc: "Cama matrimonial, A/C, Wi-Fi", price: 45.00 }]
+        },
+        {
+            id: "farmatodo", type: "health", name: "Farmatodo Alta Vista", categoryText: "Farmacia y Conveniencia", locationText: "Alta Vista Norte",
+            lat: 8.2970, lng: -62.7300, rating: 4.8, reviews: 1250,
+            image: "https://images.unsplash.com/photo-1576602976047-174e57a47881?w=700",
+            logo: "https://images.unsplash.com/photo-1628771065518-0d82f1938462?w=150",
+            gallery: ["https://images.unsplash.com/photo-1576602976047-174e57a47881?w=800"],
+            description: "Farmacia de turno, medicamentos y cuidado personal 24 horas.",
+            whatsapp: "584120000000", phone: "0800-FARMATODO", instagram: "@farmatodovzla", hours: "Abierto 24 Horas",
+            pagoMovil: "Banesco • J-00020200 • 0412-0000000",
+            menu: [{ category: "medicamentos", name: "Paracetamol 500mg", desc: "Blister de 10 pastillas", price: 2.00 }]
         }
+    ];
 
-        function calculateDeliveryFee(distanceKM) {
-            const fee = TARIFA_MINIMA + (distanceKM * COSTO_POR_KM);
-            return Math.max(TARIFA_MINIMA, fee);
-        }
+    const EVENTS = [
+        { title: "Noche Acústica de Rock", place: "Monalisa Bar, Alta Vista", date: "Viernes 24 Oct", price: "Entrada Libre", icon: "fa-guitar" },
+        { title: "Stand Up: Noche de Risas", place: "Hotel Rosa Bela", date: "Sábado 25 Oct", price: "$10 Entrada", icon: "fa-microphone" }
+    ];
 
-        // ==============================================================
-        // GEOLOCALIZACIÓN CON GPS REAL POR HARDWARE
-        // ==============================================================
-        function requestAccurateGPS() {
-            const options = {
-                enableHighAccuracy: true, // Forzar GPS
-                timeout: 5000,
-                maximumAge: 0
-            };
+    const TARIFA_MINIMA = 1.50; const COSTO_POR_KM = 0.50;
+    let currentUserLocation = { name: "PZO (Alta Vista)", lat: 8.2980, lng: -62.7330 };
+    let currentCartRestaurant = null; let cartItems = [];
 
-            if (!navigator.geolocation) {
-                alert("Geolocalización no soportada en este navegador.");
-                return;
-            }
+    function calculateHaversineKM(lat1, lon1, lat2, lon2) {
+        const R = 6371; const dLat = (lat2 - lat1) * Math.PI / 180; const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    }
+    function calculateDeliveryFee(distanceKM) { return Math.max(TARIFA_MINIMA, TARIFA_MINIMA + (distanceKM * COSTO_POR_KM)); }
 
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    currentUserLocation.lat = pos.coords.latitude;
-                    currentUserLocation.lng = pos.coords.longitude;
-                    currentUserLocation.name = "Mi Ubicación (GPS)";
-                    document.getElementById("currentLocationLabel").innerText = currentUserLocation.name;
-                    renderAllCarousels();
-                },
-                (err) => {
-                    console.warn(`GPS Error (${err.code}): ${err.message}`);
-                    alert("No pudimos captar tu GPS exacto. Puedes seleccionar tu sector manualmente.");
-                },
-                options
-            );
-        }
+    function lockBackgroundScroll(locked) {
+        if (locked) document.body.classList.add("overflow-hidden");
+        else document.body.classList.remove("overflow-hidden");
+    }
 
-        // ==============================================================
-        // RENDERIZADO DE CARRUSELES TEMÁTICOS HORIZONTALES
-        // ==============================================================
-        function createPlaceCard(place) {
-            const distance = calculateHaversineKM(place.lat, place.lng, currentUserLocation.lat, currentUserLocation.lng);
-            const fee = calculateDeliveryFee(distance);
+    function createPlaceCard(place) {
+        const distance = calculateHaversineKM(place.lat, place.lng, currentUserLocation.lat, currentUserLocation.lng);
+        const fee = calculateDeliveryFee(distance);
+        const card = document.createElement("div");
+        card.className = "min-w-[210px] max-w-[210px] bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-md shrink-0 flex flex-col justify-between transition cursor-pointer active:scale-95";
+        card.onclick = () => openRestaurantModal(place.id);
+        card.innerHTML = `
+            <div>
+                <div class="h-28 w-full bg-slate-100 relative overflow-hidden">
+                    <img src="${place.image}" class="w-full h-full object-cover">
+                    <span class="absolute top-2 left-2 bg-white/90 backdrop-blur-md text-slate-800 text-[9px] font-black px-2 py-0.5 rounded-full">⭐ ${place.rating}</span>
+                </div>
+                <div class="p-3">
+                    <h4 class="font-extrabold text-xs text-slate-900 truncate">${place.name}</h4>
+                    <p class="text-[10px] text-slate-400 font-semibold truncate">${place.categoryText}</p>
+                    <p class="text-[10px] text-slate-500 mt-1 flex items-center gap-1"><i class="fa-solid fa-location-dot text-orange-500"></i> ${place.locationText}</p>
+                </div>
+            </div>
+            <div class="px-3 pb-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
+                <span class="font-bold text-slate-600 flex items-center gap-1"><i class="fa-solid fa-motorcycle text-emerald-600"></i> $${fee.toFixed(2)}</span>
+                <span class="font-extrabold text-[#FF3B30]">Ver <i class="fa-solid fa-chevron-right text-[8px]"></i></span>
+            </div>
+        `;
+        return card;
+    }
 
+    function renderAllCarousels() {
+        const foodBox = document.getElementById("foodCarouselContainer"); foodBox.innerHTML = "";
+        const cafeBox = document.getElementById("cafeCarouselContainer"); cafeBox.innerHTML = "";
+        const hotelBox = document.getElementById("hotelCarouselContainer"); hotelBox.innerHTML = "";
+        const gymBox = document.getElementById("gymCarouselContainer"); gymBox.innerHTML = "";
+        const healthBox = document.getElementById("healthCarouselContainer"); healthBox.innerHTML = "";
+
+        PLACES.forEach(p => {
+            if (p.type === "food") foodBox.appendChild(createPlaceCard(p));
+            if (p.type === "cafe") cafeBox.appendChild(createPlaceCard(p));
+            if (p.type === "hotel") hotelBox.appendChild(createPlaceCard(p));
+            if (p.type === "gym") gymBox.appendChild(createPlaceCard(p));
+            if (p.type === "health") healthBox.appendChild(createPlaceCard(p));
+        });
+    }
+
+    function renderEventsCarousel() {
+        const eventsBox = document.getElementById("eventsContainer"); eventsBox.innerHTML = "";
+        EVENTS.forEach(ev => {
             const card = document.createElement("div");
-            card.className = "min-w-[210px] max-w-[210px] bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-md shrink-0 flex flex-col justify-between transition cursor-pointer active:scale-95";
-            card.onclick = () => openRestaurantModal(place.id);
-
+            card.className = "min-w-[190px] bg-slate-900 text-white rounded-2xl p-3 shrink-0 flex flex-col justify-between border border-slate-800";
             card.innerHTML = `
                 <div>
-                    <div class="h-28 w-full bg-slate-100 relative overflow-hidden">
-                        <img src="${place.image}" class="w-full h-full object-cover">
-                        <span class="absolute top-2 left-2 bg-white/90 backdrop-blur-md text-slate-800 text-[9px] font-black px-2 py-0.5 rounded-full shadow-sm">
-                            ⭐ ${place.rating}
-                        </span>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="bg-amber-400/20 text-amber-300 text-[9px] font-bold px-2 py-0.5 rounded-md">${ev.date}</span>
+                        <i class="fa-solid ${ev.icon} text-slate-400 text-xs"></i>
                     </div>
-                    <div class="p-3">
-                        <h4 class="font-extrabold text-xs text-slate-900 truncate">${place.name}</h4>
-                        <p class="text-[10px] text-slate-400 font-semibold truncate">${place.categoryText}</p>
-                        <p class="text-[10px] text-slate-500 mt-1 flex items-center gap-1 truncate">
-                            <i class="fa-solid fa-location-dot text-orange-500"></i> ${place.locationText}
-                        </p>
-                    </div>
+                    <h4 class="font-extrabold text-xs leading-tight truncate">${ev.title}</h4>
+                    <p class="text-[10px] text-slate-400 mt-1 truncate">${ev.place}</p>
                 </div>
-                <div class="px-3 pb-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px]">
-                    <span class="font-bold text-slate-600 flex items-center gap-1">
-                        <i class="fa-solid fa-motorcycle text-emerald-600"></i> $${fee.toFixed(2)}
-                    </span>
-                    <span class="font-extrabold text-[#FF3B30] flex items-center gap-0.5">
-                        Ver <i class="fa-solid fa-chevron-right text-[8px]"></i>
-                    </span>
+                <div class="mt-3 pt-2 border-t border-slate-800 flex justify-between items-center">
+                    <span class="text-[10px] font-black text-amber-400">${ev.price}</span>
+                    <a href="https://wa.me/584129413934?text=${encodeURIComponent('Hola, info sobre el evento: ' + ev.title)}" target="_blank" class="text-[9px] font-extrabold text-orange-400 flex items-center gap-1">Info →</a>
                 </div>
             `;
-            return card;
-        }
-
-        function renderAllCarousels() {
-            const foodBox = document.getElementById("foodCarouselContainer");
-            const hotelBox = document.getElementById("hotelCarouselContainer");
-            const gymBox = document.getElementById("gymCarouselContainer");
-
-            foodBox.innerHTML = "";
-            hotelBox.innerHTML = "";
-            gymBox.innerHTML = "";
-
-            PLACES.forEach(p => {
-                if (p.type === "food" || p.type === "cafe") foodBox.appendChild(createPlaceCard(p));
-                if (p.type === "hotel") hotelBox.appendChild(createPlaceCard(p));
-                if (p.type === "gym") gymBox.appendChild(createPlaceCard(p));
-            });
-        }
-
-        function filterByTaxonomy(tax) {
-            if (tax === "all") {
-                renderAllCarousels();
-                return;
-            }
-            const foodBox = document.getElementById("foodCarouselContainer");
-            foodBox.innerHTML = "";
-            PLACES.filter(p => p.type === tax).forEach(p => foodBox.appendChild(createPlaceCard(p)));
-            foodBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        function handleGlobalSearch() {
-            const query = document.getElementById("globalSearchInput").value.toLowerCase().trim();
-            const foodBox = document.getElementById("foodCarouselContainer");
-            foodBox.innerHTML = "";
-
-            const matches = PLACES.filter(p => 
-                p.name.toLowerCase().includes(query) || 
-                p.categoryText.toLowerCase().includes(query) ||
-                p.description.toLowerCase().includes(query)
-            );
-
-            matches.forEach(p => foodBox.appendChild(createPlaceCard(p)));
-        }
-
-        // ==============================================================
-        // FICHA INMERSIVA Y MAPA LEAFLET
-        // ==============================================================
-        let activeRestaurant = null;
-        let leafletMapInstance = null;
-        let activeSubCategory = "all";
-
-        function openRestaurantModal(placeId) {
-            activeRestaurant = PLACES.find(p => p.id === placeId);
-            if (!activeRestaurant) return;
-
-            document.getElementById("modalCoverImg").src = activeRestaurant.image;
-            document.getElementById("modalRestName").innerText = activeRestaurant.name;
-            document.getElementById("modalBadgeCategory").innerText = activeRestaurant.type === 'food' ? 'RESTAURANTE' : activeRestaurant.type.toUpperCase();
-            document.getElementById("modalRestHours").innerText = activeRestaurant.hours;
-            document.getElementById("modalRatingText").innerText = `${activeRestaurant.rating} (${activeRestaurant.reviews} reviews)`;
-            document.getElementById("modalRestDesc").innerText = activeRestaurant.description;
-
-            // Datos de la pestaña Info
-            document.getElementById("infoScheduleText").innerText = activeRestaurant.hours;
-            document.getElementById("infoInstagramText").innerText = activeRestaurant.instagram;
-            document.getElementById("infoInstagramLink").href = `https://instagram.com/${activeRestaurant.instagram.replace('@','')}`;
-            document.getElementById("infoPhoneText").innerText = activeRestaurant.phone;
-            document.getElementById("infoAddressText").innerText = activeRestaurant.locationText;
-            document.getElementById("reviewScoreBig").innerText = activeRestaurant.rating;
-
-            // Botones de acción directa
-            document.getElementById("btnActionWhatsapp").href = `https://wa.me/${activeRestaurant.whatsapp}?text=Hola,%20vi%20su%20perfil%20en%20Goordaz`;
-            document.getElementById("btnActionCall").href = `tel:${activeRestaurant.phone.replace(/[^0-9]/g, '')}`;
-
-            // Pestaña inicial
-            switchMainTab("menu");
-            setupMenuSubTabs();
-
-            document.getElementById("restaurantModal").classList.remove("hidden");
-        }
-
-        function closeRestaurantModal() {
-            document.getElementById("restaurantModal").classList.add("hidden");
-        }
-
-        function switchMainTab(tab) {
-            ["menu", "info", "reviews"].forEach(t => {
-                const btn = document.getElementById(`tabBtn-${t}`);
-                const content = document.getElementById(`tabContent-${t}`);
-                if (t === tab) {
-                    btn.className = "pb-2.5 px-3 border-b-2 border-[#FF3B30] text-slate-900";
-                    content.classList.remove("hidden");
-                } else {
-                    btn.className = "pb-2.5 px-3 border-b-2 border-transparent hover:text-slate-700";
-                    content.classList.add("hidden");
-                }
-            });
-
-            // Inicializar Leaflet si se pasa a info
-            if (tab === "info") {
-                setTimeout(() => {
-                    if (leafletMapInstance) leafletMapInstance.remove();
-                    leafletMapInstance = L.map('leafletMap').setView([activeRestaurant.lat, activeRestaurant.lng], 15);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap'
-                    }).addTo(leafletMapInstance);
-                    L.marker([activeRestaurant.lat, activeRestaurant.lng]).addTo(leafletMapInstance)
-                        .bindPopup(`<b>${activeRestaurant.name}</b><br>${activeRestaurant.locationText}`)
-                        .openPopup();
-                }, 200);
-            }
-        }
-
-        function setupMenuSubTabs() {
-            const subTabsBox = document.getElementById("menuSubTabsContainer");
-            subTabsBox.innerHTML = "";
-
-            const categories = ["all", ...new Set(activeRestaurant.menu.map(m => m.category))];
-            activeSubCategory = "all";
-
-            categories.forEach(cat => {
-                const b = document.createElement("button");
-                b.className = `px-3 py-1.5 rounded-full text-[11px] font-bold capitalize whitespace-nowrap transition ${
-                    cat === 'all' ? 'bg-[#FF6B00] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                }`;
-                b.innerText = cat === "all" ? "Todo el Menú" : cat;
-                b.onclick = () => {
-                    activeSubCategory = cat;
-                    subTabsBox.querySelectorAll("button").forEach(btn => {
-                        btn.className = "px-3 py-1.5 rounded-full text-[11px] font-bold capitalize whitespace-nowrap bg-slate-100 text-slate-600 hover:bg-slate-200 transition";
-                    });
-                    b.className = "px-3 py-1.5 rounded-full text-[11px] font-bold capitalize whitespace-nowrap bg-[#FF6B00] text-white shadow-sm transition";
-                    renderMenuDishes();
-                };
-                subTabsBox.appendChild(b);
-            });
-
-            renderMenuDishes();
-        }
-
-        function renderMenuDishes() {
-            const dishesBox = document.getElementById("menuDishesContainer");
-            dishesBox.innerHTML = "";
-
-            const items = activeRestaurant.menu.filter(d => activeSubCategory === "all" || d.category === activeSubCategory);
-
-            items.forEach(dish => {
-                const row = document.createElement("div");
-                row.className = "p-3 bg-white border border-slate-100 rounded-2xl flex justify-between items-center gap-3 shadow-sm";
-                row.innerHTML = `
-                    <div class="flex-1">
-                        <h5 class="text-xs font-black text-slate-900">${dish.name}</h5>
-                        <p class="text-[10px] text-slate-500 leading-tight mt-0.5">${dish.desc}</p>
-                        <span class="inline-block mt-1 font-black text-xs text-orange-600">$${dish.price.toFixed(2)} USD</span>
-                    </div>
-                    <button onclick='handleAddToCart(${JSON.stringify(dish)})' class="bg-[#FF6B00] hover:bg-orange-600 active:scale-95 text-white font-extrabold text-[11px] px-3 py-1.5 rounded-xl shadow-sm flex items-center gap-1 shrink-0 transition">
-                        + Agregar
-                    </button>
-                `;
-                dishesBox.appendChild(row);
-            });
-        }
-
-        // ==============================================================
-        // LÓGICA DEL CARRITO MONOLOCAL
-        // ==============================================================
-        function handleAddToCart(dish) {
-            // Verificar si hay productos de otro local
-            if (currentCartRestaurant && currentCartRestaurant.id !== activeRestaurant.id) {
-                const confirmClear = confirm(`Ya tienes productos de "${currentCartRestaurant.name}". ¿Deseas vaciar tu carrito para empezar a pedir en "${activeRestaurant.name}"?`);
-                if (confirmClear) {
-                    cartItems = [];
-                    currentCartRestaurant = activeRestaurant;
-                } else {
-                    return;
-                }
-            } else {
-                currentCartRestaurant = activeRestaurant;
-            }
-
-            cartItems.push(dish);
-            updateCartBadge();
-
-            // Notificación visual rápida
-            const badge = document.getElementById("cartCountBadge");
-            badge.classList.add("scale-125");
-            setTimeout(() => badge.classList.remove("scale-125"), 200);
-        }
-
-        function updateCartBadge() {
-            const badge = document.getElementById("cartCountBadge");
-            if (cartItems.length > 0) {
-                badge.innerText = cartItems.length;
-                badge.classList.remove("hidden");
-            } else {
-                badge.classList.add("hidden");
-            }
-        }
-
-        function openCartModal() {
-            if (!currentCartRestaurant || cartItems.length === 0) {
-                alert("Tu carrito de Goordaz está vacío. Entra a cualquier restaurante y agrega tus platos.");
-                return;
-            }
-
-            document.getElementById("cartRestNameHeader").innerText = currentCartRestaurant.name;
-            document.getElementById("cartPagoMovilData").innerText = currentCartRestaurant.pagoMovil;
-
-            renderCartModalList();
-            document.getElementById("cartModal").classList.remove("hidden");
-        }
-
-        function closeCartModal() {
-            document.getElementById("cartModal").classList.add("hidden");
-        }
-
-        function renderCartModalList() {
-            const list = document.getElementById("cartItemsContainer");
-            list.innerHTML = "";
-
-            let subtotal = 0;
-
-            cartItems.forEach((item, index) => {
-                subtotal += item.price;
-                const row = document.createElement("div");
-                row.className = "pt-2 flex justify-between items-center text-xs";
-                row.innerHTML = `
-                    <div class="flex-1 pr-2">
-                        <span class="font-bold text-slate-800">${item.name}</span>
-                        <span class="block text-[10px] text-orange-600 font-extrabold">$${item.price.toFixed(2)}</span>
-                    </div>
-                    <button onclick="removeItemFromCart(${index})" class="text-red-500 hover:text-red-700 p-1">
-                        <i class="fa-regular fa-trash-can"></i>
-                    </button>
-                `;
-                list.appendChild(row);
-            });
-
-            const distance = calculateHaversineKM(currentCartRestaurant.lat, currentCartRestaurant.lng, currentUserLocation.lat, currentUserLocation.lng);
-            const deliveryFee = calculateDeliveryFee(distance);
-            const totalUSD = subtotal + deliveryFee;
-            const totalVES = totalUSD * BCV_RATE;
-
-            document.getElementById("cartSubtotalText").innerText = `$${subtotal.toFixed(2)}`;
-            document.getElementById("cartDeliveryText").innerText = `$${deliveryFee.toFixed(2)} (${distance.toFixed(1)} km)`;
-            document.getElementById("cartTotalUSD").innerText = `$${totalUSD.toFixed(2)} USD`;
-            document.getElementById("cartTotalVES").innerText = `${totalVES.toFixed(2)} Bs (Tasa: ${BCV_RATE.toFixed(2)})`;
-        }
-
-        function removeItemFromCart(index) {
-            cartItems.splice(index, 1);
-            if (cartItems.length === 0) {
-                currentCartRestaurant = null;
-                closeCartModal();
-            } else {
-                renderCartModalList();
-            }
-            updateCartBadge();
-        }
-
-        function sendOrderToWhatsApp() {
-            if (cartItems.length === 0 || !currentCartRestaurant) return;
-
-            const ref = document.getElementById("orderReferenceInput").value.trim();
-            const distance = calculateHaversineKM(currentCartRestaurant.lat, currentCartRestaurant.lng, currentUserLocation.lat, currentUserLocation.lng);
-            const deliveryFee = calculateDeliveryFee(distance);
-            const subtotal = cartItems.reduce((acc, c) => acc + c.price, 0);
-            const totalUSD = subtotal + deliveryFee;
-            const totalVES = totalUSD * BCV_RATE;
-
-            let msg = `*NUEVO PEDIDO DESDE GOORDAZ*\n`;
-            msg += `📍 *Ubicación Cliente:* ${currentUserLocation.name}\n`;
-            msg += `🍽️ *Local:* ${currentCartRestaurant.name}\n\n`;
-            msg += `*DETALLE DEL PEDIDO:*\n`;
-
-            cartItems.forEach(i => {
-                msg += `• ${i.name} ($${i.price.toFixed(2)})\n`;
-            });
-
-            msg += `\n🛵 *Delivery (${distance.toFixed(1)} km):* $${deliveryFee.toFixed(2)}`;
-            msg += `\n💵 *TOTAL USD:* $${totalUSD.toFixed(2)}`;
-            msg += `\n🇻🇪 *TOTAL VES:* ${totalVES.toFixed(2)} Bs (BCV: ${BCV_RATE.toFixed(2)})`;
-
-            if (ref) {
-                msg += `\n\n📲 *Referencia Pago Móvil:* ${ref}`;
-            }
-
-            const waUrl = `https://wa.me/${currentCartRestaurant.whatsapp}?text=${encodeURIComponent(msg)}`;
-            window.open(waUrl, "_blank");
-        }
-
-        // ==============================================================
-        // BUSCADOR PREDICTIVO DE SECTORES
-        // ==============================================================
-        function toggleLocationModal(show) {
-            const modal = document.getElementById("locationModal");
-            if (show) {
-                modal.classList.remove("hidden");
-                handleZoneInput("");
-            } else {
-                modal.classList.add("hidden");
-            }
-        }
-
-        function handleZoneInput(query) {
-            const list = document.getElementById("zoneSuggestionsList");
-            list.innerHTML = "";
-
-            const cleanQ = query.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-            const matches = PZO_SECTORS.filter(s => s.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(cleanQ));
-
-            matches.slice(0, 5).forEach(sec => {
-                const item = document.createElement("div");
-                item.className = "p-2.5 hover:bg-orange-50 rounded-xl cursor-pointer flex justify-between items-center transition";
-                item.innerHTML = `
-                    <span class="text-xs font-bold text-slate-800">📍 ${sec.name}</span>
-                    <span class="text-[9px] font-black text-slate-400 uppercase">${sec.type}</span>
-                `;
-                item.onclick = () => {
-                    currentUserLocation.name = sec.name;
-                    currentUserLocation.lat = sec.lat;
-                    currentUserLocation.lng = sec.lng;
-                    document.getElementById("currentLocationLabel").innerText = sec.name;
-                    toggleLocationModal(false);
-                    renderAllCarousels();
-                };
-                list.appendChild(item);
-            });
-        }
-
-        function renderEvents() {
-            const container = document.getElementById("eventsContainer");
-            container.innerHTML = "";
-            EVENTS.forEach(ev => {
-                const el = document.createElement("div");
-                el.className = "min-w-[190px] bg-slate-900 text-white rounded-2xl p-3 shrink-0 flex flex-col justify-between border border-slate-800";
-                el.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="bg-amber-400/20 text-amber-300 text-[9px] font-bold px-2 py-0.5 rounded-md">${ev.date}</span>
-                            <i class="fa-solid ${ev.icon} text-slate-400 text-xs"></i>
-                        </div>
-                        <h4 class="font-extrabold text-xs leading-tight truncate">${ev.title}</h4>
-                        <p class="text-[10px] text-slate-400 mt-1 truncate">${ev.place}</p>
-                    </div>
-                    <div class="mt-3 pt-2 border-t border-slate-800 flex justify-between items-center">
-                        <span class="text-[10px] font-black text-amber-400">${ev.price}</span>
-                        <a href="https://wa.me/584129413934?text=${encodeURIComponent('Hola, quiero información del evento: ' + ev.title)}" target="_blank" class="text-[9px] font-extrabold text-orange-400 flex items-center gap-1">Info →</a>
-                    </div>
-                `;
-                container.appendChild(el);
-            });
-        }
-
-        // INICIALIZACIÓN
-        window.addEventListener("DOMContentLoaded", () => {
-            renderAllCarousels();
-            renderEvents();
+            eventsBox.appendChild(card);
         });
-    </script>
+    }
+
+    function filterByTaxonomy(tax) {
+        document.querySelectorAll('.carousel-section').forEach(s => s.classList.add('hidden'));
+        if (tax === "all") {
+            document.querySelectorAll('.carousel-section').forEach(s => s.classList.remove('hidden'));
+            renderAllCarousels();
+        } else {
+            const sec = document.getElementById(`sec-${tax}`);
+            if(sec) sec.classList.remove('hidden');
+            const box = document.getElementById(`${tax}CarouselContainer`);
+            if(box) { box.innerHTML = ""; PLACES.filter(p => p.type === tax).forEach(p => box.appendChild(createPlaceCard(p))); }
+        }
+    }
+
+    function handleGlobalSearch() {
+        const query = document.getElementById("globalSearchInput").value.toLowerCase().trim();
+        document.querySelectorAll('.carousel-section').forEach(s => s.classList.add('hidden'));
+        document.getElementById('sec-food').classList.remove('hidden');
+        const box = document.getElementById("foodCarouselContainer"); box.innerHTML = "";
+        PLACES.filter(p => p.name.toLowerCase().includes(query) || p.categoryText.toLowerCase().includes(query)).forEach(p => box.appendChild(createPlaceCard(p)));
+    }
+
+    let activeRestaurant = null; let leafletMapInstance = null; let activeSubCategory = "all";
+
+    function openRestaurantModal(placeId) {
+        activeRestaurant = PLACES.find(p => p.id === placeId);
+        if (!activeRestaurant) return;
+        lockBackgroundScroll(true);
+        document.getElementById("modalCoverImg").src = activeRestaurant.image;
+        document.getElementById("modalLogoImg").src = activeRestaurant.logo;
+        document.getElementById("modalRestName").innerText = activeRestaurant.name;
+        document.getElementById("modalBadgeCategory").innerText = activeRestaurant.type.toUpperCase();
+        document.getElementById("modalRestHours").innerText = activeRestaurant.hours;
+        document.getElementById("modalRatingText").innerText = `${activeRestaurant.rating} (${activeRestaurant.reviews} reviews)`;
+        document.getElementById("modalRestDesc").innerText = activeRestaurant.description;
+        document.getElementById("infoScheduleText").innerText = activeRestaurant.hours;
+        document.getElementById("infoInstagramText").innerText = activeRestaurant.instagram;
+        document.getElementById("infoInstagramLink").href = `https://instagram.com/${activeRestaurant.instagram.replace('@','')}`;
+        document.getElementById("infoAddressText").innerText = activeRestaurant.locationText;
+        document.getElementById("btnActionWhatsapp").href = `https://wa.me/${activeRestaurant.whatsapp}`;
+        switchMainTab("menu"); setupMenuSubTabs();
+        document.getElementById("restaurantModal").classList.remove("hidden");
+    }
+
+    function closeRestaurantModal() { document.getElementById("restaurantModal").classList.add("hidden"); lockBackgroundScroll(false); }
+
+    function switchMainTab(tab) {
+        ["menu", "info"].forEach(t => {
+            const btn = document.getElementById(`tabBtn-${t}`); const content = document.getElementById(`tabContent-${t}`);
+            if (t === tab) { btn.className = "pb-2.5 px-3 border-b-2 border-[#FF3B30] text-slate-900"; content.classList.remove("hidden"); } 
+            else { btn.className = "pb-2.5 px-3 border-b-2 border-transparent hover:text-slate-700"; content.classList.add("hidden"); }
+        });
+        if (tab === "info") {
+            setTimeout(() => {
+                if (leafletMapInstance) leafletMapInstance.remove();
+                leafletMapInstance = L.map('leafletMap').setView([activeRestaurant.lat, activeRestaurant.lng], 15);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(leafletMapInstance);
+                L.marker([activeRestaurant.lat, activeRestaurant.lng]).addTo(leafletMapInstance).openPopup();
+            }, 200);
+        }
+    }
+
+    function setupMenuSubTabs() {
+        const subTabsBox = document.getElementById("menuSubTabsContainer"); subTabsBox.innerHTML = "";
+        const categories = [...new Set(activeRestaurant.menu.map(m => m.category))]; 
+        
+        activeSubCategory = categories[0] || "";
+
+        categories.forEach((cat, index) => {
+            const b = document.createElement("button");
+            const isActive = index === 0;
+            b.className = `px-3.5 py-1.5 rounded-full text-[11px] font-bold capitalize transition ${isActive ? 'bg-[#FF6B00] text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`;
+            b.innerText = cat;
+            b.onclick = () => {
+                activeSubCategory = cat;
+                subTabsBox.querySelectorAll("button").forEach(btn => btn.className = "px-3.5 py-1.5 rounded-full text-[11px] font-bold capitalize bg-slate-100 text-slate-600 hover:bg-slate-200 transition");
+                b.className = "px-3.5 py-1.5 rounded-full text-[11px] font-bold capitalize bg-[#FF6B00] text-white shadow-sm transition";
+                renderMenuDishes();
+            };
+            subTabsBox.appendChild(b);
+        });
+        renderMenuDishes();
+    }
+
+    function renderMenuDishes() {
+        const dishesBox = document.getElementById("menuDishesContainer"); dishesBox.innerHTML = "";
+        activeRestaurant.menu.filter(d => d.category === activeSubCategory).forEach(dish => {
+            const row = document.createElement("div"); row.className = "p-3 bg-white border border-slate-100 rounded-2xl flex justify-between items-center gap-3 shadow-sm";
+            row.innerHTML = `<div class="flex-1"><h5 class="text-xs font-black text-slate-900">${dish.name}</h5><p class="text-[10px] text-slate-500 mt-0.5">${dish.desc}</p><span class="inline-block mt-1 font-black text-xs text-orange-600">$${dish.price.toFixed(2)}</span></div><button onclick='handleAddToCart(${JSON.stringify(dish)})' class="bg-[#FF6B00] hover:bg-orange-600 active:scale-95 text-white font-extrabold text-[11px] px-3.5 py-1.5 rounded-xl shadow-sm transition">+ Agregar</button>`;
+            dishesBox.appendChild(row);
+        });
+    }
+
+    function openGalleryModal() {
+        if (!activeRestaurant) return; document.getElementById("galleryPlaceNameTitle").innerText = `${activeRestaurant.name} • Fotos`;
+        const slider = document.getElementById("galleryPhotosSlider"); slider.innerHTML = "";
+        activeRestaurant.gallery.forEach((url) => {
+            const item = document.createElement("div"); item.className = "min-w-[280px] max-w-[280px] h-72 rounded-3xl overflow-hidden shadow-2xl relative shrink-0 border border-white/10";
+            item.innerHTML = `<img src="${url}" class="w-full h-full object-cover">`; slider.appendChild(item);
+        });
+        document.getElementById("galleryModal").classList.remove("hidden");
+    }
+    function closeGalleryModal() { document.getElementById("galleryModal").classList.add("hidden"); }
+
+    /* LÓGICA DEL TICKET / CARRITO CON VALIDACIÓN MONOLOCAL */
+    function handleAddToCart(dish) {
+        if (currentCartRestaurant && currentCartRestaurant.id !== activeRestaurant.id) {
+            const confirmChange = confirm(`⚠️ Ya tienes productos en tu pedido de "${currentCartRestaurant.name}". ¿Deseas vaciar tu carrito para pedir en "${activeRestaurant.name}"?`);
+            if (confirmChange) {
+                cartItems = [];
+                currentCartRestaurant = activeRestaurant;
+            } else {
+                return;
+            }
+        } else {
+            currentCartRestaurant = activeRestaurant;
+        }
+
+        cartItems.push(dish);
+        const badge = document.getElementById("cartCountBadge");
+        badge.innerText = cartItems.length;
+        badge.classList.remove("hidden");
+        badge.classList.add("scale-125");
+        setTimeout(() => badge.classList.remove("scale-125"), 200);
+    }
+
+    function openCartModal() {
+        if (!currentCartRestaurant || cartItems.length === 0) {
+            alert("Tu carrito de Goordaz está vacío. Entra a cualquier restaurante o negocio y agrega tus productos.");
+            return;
+        }
+        lockBackgroundScroll(true);
+        document.getElementById("orderNumber").innerText = '#ORD-' + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById("cartRestNameHeader").innerText = currentCartRestaurant.name;
+        document.getElementById("cartPagoMovilData").innerText = currentCartRestaurant.pagoMovil;
+        renderCartModalList();
+        document.getElementById("cartModal").classList.remove("hidden");
+    }
+
+    function closeCartModal() { document.getElementById("cartModal").classList.add("hidden"); lockBackgroundScroll(false); }
+
+    function renderCartModalList() {
+        const list = document.getElementById("cartItemsContainer"); list.innerHTML = ""; let subtotal = 0;
+        cartItems.forEach((item, index) => {
+            subtotal += item.price; const row = document.createElement("div"); row.className = "flex justify-between text-sm font-bold mb-1 items-start border-b border-gray-100 pb-2";
+            row.innerHTML = `<div class="flex-1 pr-2"><span>1x ${item.name}</span><p class="text-[10px] text-gray-500 font-normal leading-tight">${item.desc}</p></div><div class="flex items-center gap-2 text-slate-800"><span>$${item.price.toFixed(2)}</span><button onclick="removeItemFromCart(${index})" class="text-red-500 hover:text-red-700 p-1"><i class="fa-regular fa-trash-can text-xs"></i></button></div>`;
+            list.appendChild(row);
+        });
+
+        const distance = calculateHaversineKM(currentCartRestaurant.lat, currentCartRestaurant.lng, currentUserLocation.lat, currentUserLocation.lng);
+        const deliveryFee = calculateDeliveryFee(distance);
+        
+        document.getElementById("cartSubtotalText").innerText = `$${subtotal.toFixed(2)}`;
+        document.getElementById("cartDistanceBadge").innerText = `${distance.toFixed(1)} km`;
+        document.getElementById("cartDeliveryText").innerText = `$${deliveryFee.toFixed(2)}`;
+        document.getElementById("cartTotalUSD").innerText = `$${(subtotal + deliveryFee).toFixed(2)}`;
+        document.getElementById("cartTotalVES").innerText = `${((subtotal + deliveryFee) * BCV_RATE).toFixed(2)} Bs`;
+    }
+
+    function removeItemFromCart(index) {
+        cartItems.splice(index, 1);
+        const badge = document.getElementById("cartCountBadge");
+        if (cartItems.length === 0) { currentCartRestaurant = null; closeCartModal(); badge.classList.add("hidden"); } 
+        else { renderCartModalList(); badge.innerText = cartItems.length; }
+    }
+
+    function sendOrderToWhatsApp() {
+        if (cartItems.length === 0 || !currentCartRestaurant) return;
+        const nombre = document.getElementById('cNombre').value || "No especificado"; 
+        const telefono = document.getElementById('cTelefono').value || "No especificado"; 
+        const direccion = document.getElementById('cDireccion').value || "Retiro en local"; 
+        const metodoPago = document.getElementById('cMetodoPago').value; 
+        const ref = document.getElementById("orderReferenceInput").value.trim(); 
+        const orden = document.getElementById('orderNumber').innerText;
+        
+        const distance = calculateHaversineKM(currentCartRestaurant.lat, currentCartRestaurant.lng, currentUserLocation.lat, currentUserLocation.lng);
+        const deliveryFee = calculateDeliveryFee(distance); 
+        const subtotal = cartItems.reduce((acc, c) => acc + c.price, 0); 
+        const totalUSD = subtotal + deliveryFee;
+
+        let msg = `*🎫 NUEVO TICKET GOORDAZ*\n\n*Orden:* ${orden}\n*Local:* ${currentCartRestaurant.name}\n\n*-- DATOS CLIENTE --*\n*Nombre:* ${nombre}\n*Teléfono:* ${telefono}\n*Dirección:* ${direccion}\n*Pago:* ${metodoPago}\n\n*-- DESGLOSE --*\n`;
+        cartItems.forEach(i => { msg += `1x ${i.name} ($${i.price.toFixed(2)})\n`; });
+        msg += `\n*Delivery (${distance.toFixed(1)}km):* $${deliveryFee.toFixed(2)}\n*TOTAL USD: $${totalUSD.toFixed(2)}*\n*TOTAL BS:* ${(totalUSD * BCV_RATE).toFixed(2)} Bs\n`;
+        if (ref) msg += `\n📲 *Referencia Pago Móvil:* ${ref}\n`; 
+        msg += `\n_Gracias por usar Goordaz ⚡_`;
+        
+        window.open(`https://wa.me/${currentCartRestaurant.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
+    }
+
+    /* ZONAS Y GPS AUTOMÁTICO AL INICIAR */
+    function toggleLocationModal(show) {
+        const m = document.getElementById("locationModal");
+        if (show) { lockBackgroundScroll(true); m.classList.remove("hidden"); handleZoneInput(""); } 
+        else { m.classList.add("hidden"); lockBackgroundScroll(false); }
+    }
+    
+    function requestAccurateGPS() {
+        if (!navigator.geolocation) { alert("Geolocalización no soportada."); return; }
+        navigator.geolocation.getCurrentPosition((pos) => { 
+            currentUserLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude, name: "Mi Ubicación (GPS)" }; 
+            document.getElementById("currentLocationLabel").innerText = currentUserLocation.name; 
+            renderAllCarousels(); 
+        }, () => { 
+            // Fallback silencioso a Alta Vista si el usuario deniega el permiso GPS
+            currentUserLocation = { name: "PZO (Alta Vista)", lat: 8.2980, lng: -62.7330 };
+        }, { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 });
+    }
+
+    function handleZoneInput(q) {
+        const list = document.getElementById("zoneSuggestionsList"); list.innerHTML = "";
+        const clean = q.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+        PZO_SECTORS.filter(s => s.name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(clean)).slice(0, 5).forEach(sec => {
+            const el = document.createElement("div"); el.className = "p-2.5 hover:bg-orange-50 rounded-xl cursor-pointer flex justify-between";
+            el.innerHTML = `<span class="text-xs font-bold text-slate-800">📍 ${sec.name}</span><span class="text-[9px] font-black text-slate-400">${sec.type}</span>`;
+            el.onclick = () => { currentUserLocation = {name: sec.name, lat: sec.lat, lng: sec.lng}; document.getElementById("currentLocationLabel").innerText = sec.name; toggleLocationModal(false); renderAllCarousels(); };
+            list.appendChild(el);
+        });
+    }
+
+    // AUTOMATISMO AL ABRIR LA PÁGINA: ACTIVA GPS DE FORMA SILENCIOSA Y RENDERIZA
+    window.addEventListener("DOMContentLoaded", () => { 
+        requestAccurateGPS();
+        renderAllCarousels(); 
+        renderEventsCarousel(); 
+    });
+</script>
 </body>
 </html>
