@@ -224,8 +224,8 @@
     <div id="restaurantModal" class="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl relative modal-scroll-lock">
             <div class="relative h-60 bg-slate-900 shrink-0">
-                <img id="modalCoverImg" src="" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                <div id="modalCoverSlider" class="w-full h-full relative overflow-hidden"></div>
+                <div class="absolute inset-0 pointer-events-none bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
                 <button onclick="closeRestaurantModal()" class="absolute top-4 left-4 w-9 h-9 rounded-full bg-[#FF6B00] text-white flex items-center justify-center shadow-lg"><i class="fa-solid fa-chevron-down text-sm"></i></button>
                 <button onclick="openGalleryModal()" class="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white border border-white/20 text-[10px] font-extrabold px-3 py-1.5 rounded-full"><i class="fa-solid fa-images text-amber-400"></i> Fotos</button>
 
@@ -592,7 +592,7 @@
         activeRestaurant = PLACES.find(p => p.id === placeId);
         if (!activeRestaurant) return;
         lockBackgroundScroll(true);
-        document.getElementById("modalCoverImg").src = activeRestaurant.image;
+        renderCoverSlider(activeRestaurant.gallery && activeRestaurant.gallery.length ? activeRestaurant.gallery : [activeRestaurant.image]);
         document.getElementById("modalLogoImg").src = activeRestaurant.logo;
         document.getElementById("modalRestName").innerText = activeRestaurant.name;
         document.getElementById("modalBadgeCategory").innerText = activeRestaurant.type.toUpperCase();
@@ -606,6 +606,48 @@
         document.getElementById("btnActionWhatsapp").href = `https://wa.me/${activeRestaurant.whatsapp}`;
         switchMainTab("menu"); setupMenuSubTabs();
         document.getElementById("restaurantModal").classList.remove("hidden");
+    }
+
+
+    /* ===== SLIDER DE FOTOS EN LA PORTADA DE LA FICHA ===== */
+    let coverIdx = 0, coverList = [];
+
+    function renderCoverSlider(list) {
+        coverList = (list || []).filter(Boolean);
+        coverIdx = 0;
+        const box = document.getElementById("modalCoverSlider");
+        if (!box) return;
+        const n = coverList.length;
+        box.innerHTML = `
+            <div id="coverTrack" class="flex h-full transition-transform duration-300 ease-out">
+                ${coverList.map(src => `<img src="${esc(src)}" alt="" class="min-w-full h-full object-cover shrink-0">`).join("")}
+            </div>
+            ${n > 1 ? `
+                <div id="coverCounter" class="absolute top-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10"></div>
+                <button onclick="goCover(coverIdx - 1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center z-10"><i class="fa-solid fa-chevron-left text-xs"></i></button>
+                <button onclick="goCover(coverIdx + 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 text-white flex items-center justify-center z-10"><i class="fa-solid fa-chevron-right text-xs"></i></button>
+            ` : ""}`;
+
+        // Deslizar con el dedo (asignación directa para no acumular listeners)
+        let startX = null;
+        box.ontouchstart = e => { startX = e.touches[0].clientX; };
+        box.ontouchend = e => {
+            if (startX === null) return;
+            const dx = e.changedTouches[0].clientX - startX;
+            startX = null;
+            if (Math.abs(dx) > 40) goCover(coverIdx + (dx < 0 ? 1 : -1));
+        };
+        goCover(0);
+    }
+
+    function goCover(i) {
+        const n = coverList.length;
+        if (!n) return;
+        coverIdx = (i + n) % n;
+        const track = document.getElementById("coverTrack");
+        if (track) track.style.transform = `translateX(-${coverIdx * 100}%)`;
+        const counter = document.getElementById("coverCounter");
+        if (counter) counter.textContent = `${coverIdx + 1}/${n}`;
     }
 
     function closeRestaurantModal() { document.getElementById("restaurantModal").classList.add("hidden"); lockBackgroundScroll(false); }
@@ -652,7 +694,7 @@
         const dishesBox = document.getElementById("menuDishesContainer"); dishesBox.innerHTML = "";
         activeRestaurant.menu.filter(d => d.category === activeSubCategory).forEach(dish => {
             const row = document.createElement("div"); row.className = "p-3 bg-white border border-slate-100 rounded-2xl flex justify-between items-center gap-3 shadow-sm";
-            row.innerHTML = `<div class="flex-1"><h5 class="text-xs font-black text-slate-900">${dish.name}</h5><p class="text-[10px] text-slate-500 mt-0.5">${dish.desc}</p><span class="inline-block mt-1 font-black text-xs text-orange-600">$${dish.price.toFixed(2)}</span></div><button onclick='handleAddToCart(${JSON.stringify(dish)})' class="bg-[#FF6B00] hover:bg-orange-600 active:scale-95 text-white font-extrabold text-[11px] px-3.5 py-1.5 rounded-xl shadow-sm transition">+ Agregar</button>`;
+            row.innerHTML = `${dish.img ? `<img src="${dish.img}" alt="" class="w-16 h-16 rounded-xl object-cover shrink-0">` : ""}<div class="flex-1 min-w-0"><h5 class="text-xs font-black text-slate-900">${dish.name}</h5><p class="text-[10px] text-slate-500 mt-0.5">${dish.desc}</p><span class="inline-block mt-1 font-black text-xs text-orange-600">$${dish.price.toFixed(2)}</span></div><button onclick='handleAddToCart(${JSON.stringify(dish)})' class="bg-[#FF6B00] hover:bg-orange-600 active:scale-95 text-white font-extrabold text-[11px] px-3.5 py-1.5 rounded-xl shadow-sm transition">+ Agregar</button>`;
             dishesBox.appendChild(row);
         });
     }
@@ -838,14 +880,14 @@
                 const gal = (l.galeriaurls || "").split(/\s*\|\s*|\s+/).filter(Boolean);
                 const img = l.fotoportadaurl || l.logourl || "";
                 return {
-                    id: l.id, type: TIPOS[normKey(l.tipo)] || "food", name: l.nombrecomercio,
+                    id: l.id, alias: normKey(l.alias || l.id), type: TIPOS[normKey(l.tipo)] || "food", name: l.nombrecomercio,
                     categoryText: l.categoria, locationText: l.sectordireccion,
                     lat, lng, rating: toNum(l.reputaciongoogle) ?? "Nuevo", reviews: toNum(l.resenasgoogle) ?? 0,
                     image: img, logo: l.logourl || img, gallery: gal.length ? gal : [img],
                     description: l.descripcion, whatsapp: l.whatsapp, phone: l.telefono,
                     instagram: l.instagram || "@goordaz", hours: l.horario, pagoMovil: pm,
                     menu: menu.filter(m => m.idlocal === l.id && isYes(m.disponible) && toNum(m.preciousd) !== null)
-                              .map(m => ({ category: (m.categoria || "menu").toLowerCase(), name: m.plato, desc: m.descripcion, price: toNum(m.preciousd) }))
+                              .map(m => ({ category: (m.categoria || "menu").toLowerCase(), name: m.plato, desc: m.descripcion, price: toNum(m.preciousd), img: m.fotoplatourl || "" }))
                 };
             });
 
@@ -871,7 +913,7 @@
             document.getElementById("sheetStatus")?.classList.remove("hidden");
         }
     }
-    loadFromSheet();
+    loadFromSheet().finally(abrirDesdeEnlace);
 
     /* Botón Llamar: ahora sí marca el teléfono del local */
     const _openRestaurantModal = openRestaurantModal;
@@ -1061,6 +1103,15 @@
         window.addEventListener("load", hide);
         setTimeout(hide, 4000);
     })();
+
+
+    /* ===== ENLACE DIRECTO DE LOCAL: goordaz.app/alias ===== */
+    function abrirDesdeEnlace() {
+        const slug = normKey(decodeURIComponent(location.pathname.replace(/^\/+|\/+$/g, "")));
+        if (!slug || slug === "index" || slug === "indexhtml") return;
+        const place = PLACES.find(p => p.alias === slug || normKey(p.id) === slug);
+        if (place) openRestaurantModal(place.id);
+    }
 
     window.addEventListener("DOMContentLoaded", () => { 
         requestAccurateGPS();
