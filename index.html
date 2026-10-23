@@ -36,7 +36,7 @@
 <body class="bg-[#f8fafc]">
 
 <!-- CONTENEDOR PRINCIPAL RESPONSIVO -->
-<div class="max-w-2xl mx-auto bg-white min-h-screen shadow-2xl relative overflow-x-hidden border-x border-slate-200 pb-24">
+<div class="max-w-2xl md:max-w-6xl mx-auto bg-white min-h-screen shadow-2xl relative overflow-x-hidden border-x border-slate-200 pb-24">
     
     <!-- HEADER -->
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md px-4 py-3 border-b border-slate-100 flex justify-between items-center">
@@ -64,6 +64,7 @@
             </div>
         </div>
     </header>
+    <div id="sheetStatus" class="hidden bg-amber-100 text-amber-800 text-[11px] font-bold px-4 py-2 text-center">Algunos datos pueden estar desactualizados. Intenta recargar.</div>
 
     <!-- BUSCADOR -->
     <div class="px-4 pt-3 pb-2">
@@ -101,23 +102,9 @@
         </div>
     </div>
 
-    <!-- BANNER SANLUIS & B2B -->
+    <!-- BANNERS (carrusel desde la hoja) -->
     <section class="p-4 pt-2">
-        <div class="relative rounded-3xl overflow-hidden shadow-lg bg-slate-900 text-white min-h-[160px] flex flex-col justify-end p-4 border border-slate-800 mb-3">
-            <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=700&q=80" alt="Concierto SanLuis" class="absolute inset-0 w-full h-full object-cover opacity-40">
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
-            <div class="relative z-10 space-y-1">
-                <div class="flex items-center gap-2">
-                    <span class="bg-[#FF3B30] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">Evento de Gran Categoría</span>
-                    <span class="bg-amber-400/20 text-amber-300 border border-amber-400/30 text-[9px] font-bold px-2 py-0.5 rounded-md">15 Noviembre</span>
-                </div>
-                <h2 class="text-lg font-black leading-tight tracking-tight">SanLuis: Tour Ilusionista 2026</h2>
-                <div class="pt-1 flex items-center justify-between">
-                    <span class="text-xs font-bold text-amber-400">Entradas desde $35</span>
-                    <a href="https://tickets.vibraproductions.com/sanluis-puertoordaz-202611212000" target="_blank" class="bg-white text-slate-900 text-[11px] font-extrabold px-3 py-1 rounded-xl">Reservar →</a>
-                </div>
-            </div>
-        </div>
+        <div id="bannerCarousel" class="hidden"></div>
 
         <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1">
             <div class="min-w-[270px] brand-gradient rounded-2xl p-4 text-white shadow-md flex justify-between items-center shrink-0">
@@ -144,35 +131,36 @@
         <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1.5"><i class="fa-solid fa-utensils text-[#FF6B00] text-sm"></i><h3 class="text-xs font-black text-slate-900">Dónde Comer en PZO</h3></div>
         </div>
-        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="foodCarouselContainer"></div>
+        <div class="flex gap-3 overflow-x-auto md:overflow-visible md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-5 no-scrollbar pb-1" id="foodCarouselContainer"></div>
+        <div id="smallBannerFood" class="hidden mt-3"></div>
     </section>
 
     <section id="sec-cafe" class="carousel-section px-4 py-3">
         <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1.5"><i class="fa-solid fa-mug-hot text-purple-600 text-sm"></i><h3 class="text-xs font-black text-slate-900">Cafés & Repostería</h3></div>
         </div>
-        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="cafeCarouselContainer"></div>
+        <div class="flex gap-3 overflow-x-auto md:overflow-visible md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-5 no-scrollbar pb-1" id="cafeCarouselContainer"></div>
     </section>
 
     <section id="sec-hotel" class="carousel-section px-4 py-3">
         <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1.5"><i class="fa-solid fa-hotel text-blue-600 text-sm"></i><h3 class="text-xs font-black text-slate-900">Hoteles y Posadas</h3></div>
         </div>
-        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="hotelCarouselContainer"></div>
+        <div class="flex gap-3 overflow-x-auto md:overflow-visible md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-5 no-scrollbar pb-1" id="hotelCarouselContainer"></div>
     </section>
 
     <section id="sec-gym" class="carousel-section px-4 py-3">
         <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1.5"><i class="fa-solid fa-dumbbell text-amber-600 text-sm"></i><h3 class="text-xs font-black text-slate-900">Gimnasios y Fitness</h3></div>
         </div>
-        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="gymCarouselContainer"></div>
+        <div class="flex gap-3 overflow-x-auto md:overflow-visible md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-5 no-scrollbar pb-1" id="gymCarouselContainer"></div>
     </section>
 
     <section id="sec-health" class="carousel-section px-4 py-3">
         <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-1.5"><i class="fa-solid fa-pills text-emerald-600 text-sm"></i><h3 class="text-xs font-black text-slate-900">Salud y Farmacias</h3></div>
         </div>
-        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="healthCarouselContainer"></div>
+        <div class="flex gap-3 overflow-x-auto md:overflow-visible md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-5 no-scrollbar pb-1" id="healthCarouselContainer"></div>
     </section>
 
     <!-- EVENTOS -->
@@ -181,11 +169,11 @@
             <h3 class="text-sm font-black text-slate-900 tracking-tight">Próximos Eventos en Guayana</h3>
             <span class="text-[10px] font-bold text-slate-400">Cartelera PZO</span>
         </div>
-        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-1" id="eventsContainer"></div>
+        <div class="flex gap-3 overflow-x-auto md:overflow-visible md:grid md:grid-cols-3 lg:grid-cols-4 md:gap-5 no-scrollbar pb-1" id="eventsContainer"></div>
     </section>
 
     <!-- BARRA INFERIOR -->
-    <nav class="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200 py-2.5 px-6 flex justify-around items-center z-40">
+    <nav class="fixed bottom-0 left-0 right-0 max-w-2xl md:max-w-6xl mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200 py-2.5 px-6 flex justify-around items-center z-40">
         <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center gap-0.5 text-[#FF3B30]">
             <i class="fa-solid fa-house text-lg"></i><span class="text-[9px] font-bold">Inicio</span>
         </button>
@@ -255,6 +243,7 @@
                 <div id="tabContent-menu" class="space-y-3">
                     <div class="flex gap-2 overflow-x-auto no-scrollbar py-1" id="menuSubTabsContainer"></div>
                     <div class="space-y-2.5" id="menuDishesContainer"></div>
+                    <div id="smallBannerModal" class="hidden pt-2"></div>
                 </div>
 
                 <div id="tabContent-info" class="hidden space-y-3">
@@ -340,6 +329,7 @@
                 </div>
                 <div class="text-center text-xs font-bold text-gray-400 mt-6 pb-4">Gracias por usar Goordaz ⚡</div>
             </div>
+            <p class="text-[10px] text-gray-500 text-center mb-2 px-2">Goordaz solo conecta al cliente con el comercio. No cobra, no retiene dinero y no genera deudas. El pago se realiza directamente al local.</p>
             <div class="p-4 bg-white border-t border-gray-200">
                 <button onclick="sendOrderToWhatsApp()" class="w-full bg-black text-white font-black py-4 rounded-xl text-lg flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-xl"></i> Enviar Pedido</button>
             </div>
@@ -348,7 +338,7 @@
 </div>
 
 <script>
-    const BCV_RATE = 883.40; document.getElementById("bcvRateHeader").innerText = BCV_RATE.toFixed(2);
+    let BCV_RATE = 883.40; document.getElementById("bcvRateHeader").innerText = BCV_RATE.toFixed(2);
 
     const PZO_SECTORS = [
         { name: "Alta Vista Norte", type: "Comercial", lat: 8.2980, lng: -62.7330 },
@@ -479,7 +469,7 @@
         { title: "Stand Up: Noche de Risas", place: "Hotel Rosa Bela", date: "Sábado 25 Oct", price: "$10 Entrada", icon: "fa-microphone" }
     ];
 
-    const TARIFA_MINIMA = 1.50; const COSTO_POR_KM = 0.50;
+    let TARIFA_MINIMA = 1.50; let COSTO_POR_KM = 0.50;
     let currentUserLocation = { name: "PZO (Alta Vista)", lat: 8.2980, lng: -62.7330 };
     let currentCartRestaurant = null; let cartItems = [];
 
@@ -499,11 +489,11 @@
         const distance = calculateHaversineKM(place.lat, place.lng, currentUserLocation.lat, currentUserLocation.lng);
         const fee = calculateDeliveryFee(distance);
         const card = document.createElement("div");
-        card.className = "min-w-[210px] max-w-[210px] bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-md shrink-0 flex flex-col justify-between transition cursor-pointer active:scale-95";
+        card.className = "min-w-[210px] max-w-[210px] md:min-w-0 md:max-w-none bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm hover:shadow-md shrink-0 flex flex-col justify-between transition cursor-pointer active:scale-95";
         card.onclick = () => openRestaurantModal(place.id);
         card.innerHTML = `
             <div>
-                <div class="h-28 w-full bg-slate-100 relative overflow-hidden">
+                <div class="h-28 md:h-44 w-full bg-slate-100 relative overflow-hidden">
                     <img src="${place.image}" class="w-full h-full object-cover">
                     <span class="absolute top-2 left-2 bg-white/90 backdrop-blur-md text-slate-800 text-[9px] font-black px-2 py-0.5 rounded-full">⭐ ${place.rating}</span>
                 </div>
@@ -745,6 +735,13 @@
         if (ref) msg += `\n📲 *Referencia Pago Móvil:* ${ref}\n`; 
         msg += `\n_Gracias por usar Goordaz ⚡_`;
         
+        logOrder({
+            orden, localId: currentCartRestaurant.id, local: currentCartRestaurant.name,
+            cliente: nombre, telefono, direccion, metodo: metodoPago, referencia: ref,
+            distancia: distance.toFixed(1), delivery: deliveryFee.toFixed(2),
+            subtotal: subtotal.toFixed(2), totalUSD: totalUSD.toFixed(2),
+            totalBS: (totalUSD * BCV_RATE).toFixed(2)
+        });
         window.open(`https://wa.me/${currentCartRestaurant.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank");
     }
 
@@ -779,6 +776,257 @@
     }
 
     // AUTOMATISMO AL ABRIR LA PÁGINA: ACTIVA GPS DE FORMA SILENCIOSA Y RENDERIZA
+    /* ===== GOORDAZ: CARGA DE DATOS DESDE GOOGLE SHEETS ===== */
+    const SHEET_ID = "PEGA_AQUI_EL_ID_DE_TU_HOJA";
+
+    function sheetUrl(tab) {
+        return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&headers=1&sheet=${encodeURIComponent(tab)}`;
+    }
+    const normKey = s => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+    const toNum = v => { const n = parseFloat(String(v).replace(",", ".")); return isNaN(n) ? null : n; };
+    const isYes = v => normKey(v) === "si";
+
+    function parseCSV(text) {
+        const rows = []; let row = [], cur = "", q = false;
+        for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            if (q) {
+                if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+                else cur += ch;
+            } else if (ch === '"') q = true;
+            else if (ch === ",") { row.push(cur); cur = ""; }
+            else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cur); cur = ""; rows.push(row); row = []; }
+            else cur += ch;
+        }
+        if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+        const keys = rows.shift().map(normKey);
+        return rows.filter(r => r.some(c => c.trim() !== "")).map(r => {
+            const o = {}; keys.forEach((k, i) => o[k] = (r[i] || "").trim()); return o;
+        });
+    }
+
+    const TIPOS = { comida: "food", cafe: "cafe", hotel: "hotel", gimnasio: "gym", salud: "health" };
+
+    async function loadFromSheet() {
+        if (!SHEET_ID || SHEET_ID.startsWith("PEGA")) return;
+        try {
+            const tabs = await Promise.all(["Locales", "Menu", "Eventos", "Config"].map(async t => {
+                const r = await fetch(sheetUrl(t));
+                if (!r.ok) throw new Error("No se pudo leer " + t);
+                return parseCSV(await r.text());
+            }));
+            const [locales, menu, eventos, config] = tabs;
+
+            const nuevos = locales.filter(l => isYes(l.activo) && l.id).map(l => {
+                const lat = toNum(l.latitud) ?? 8.2980, lng = toNum(l.longitud) ?? -62.7330;
+                const pm = [l.pagomovilbanco, l.pagomovilcedularif, l.pagomoviltelefono].filter(Boolean).join(" • ");
+                const gal = (l.galeriaurls || "").split(/\s*\|\s*|\s+/).filter(Boolean);
+                const img = l.fotoportadaurl || l.logourl || "";
+                return {
+                    id: l.id, type: TIPOS[normKey(l.tipo)] || "food", name: l.nombrecomercio,
+                    categoryText: l.categoria, locationText: l.sectordireccion,
+                    lat, lng, rating: toNum(l.reputaciongoogle) ?? "Nuevo", reviews: toNum(l.resenasgoogle) ?? 0,
+                    image: img, logo: l.logourl || img, gallery: gal.length ? gal : [img],
+                    description: l.descripcion, whatsapp: l.whatsapp, phone: l.telefono,
+                    instagram: l.instagram || "@goordaz", hours: l.horario, pagoMovil: pm,
+                    menu: menu.filter(m => m.idlocal === l.id && isYes(m.disponible) && toNum(m.preciousd) !== null)
+                              .map(m => ({ category: (m.categoria || "menu").toLowerCase(), name: m.plato, desc: m.descripcion, price: toNum(m.preciousd) }))
+                };
+            });
+
+            if (nuevos.length === 0) return;
+            PLACES.length = 0; PLACES.push(...nuevos);
+
+            EVENTS.length = 0;
+            eventos.filter(e => isYes(e.activo) && e.titulo).forEach(e =>
+                EVENTS.push({ title: e.titulo, place: e.lugar, date: e.fecha, price: e.precio, icon: e.icono || "fa-star" }));
+
+            config.forEach(c => {
+                const k = normKey(c.parametro), v = toNum(c.valor);
+                if (v === null) return;
+                if (k === "tasabcv") BCV_RATE = v;
+                if (k === "tarifaminimadelivery") TARIFA_MINIMA = v;
+                if (k === "costoporkm") COSTO_POR_KM = v;
+            });
+            document.getElementById("bcvRateHeader").innerText = BCV_RATE.toFixed(2);
+
+            renderAllCarousels(); renderEventsCarousel();
+        } catch (err) {
+            console.error("[Goordaz] No se pudo cargar la hoja, se usan los datos de respaldo:", err);
+            document.getElementById("sheetStatus")?.classList.remove("hidden");
+        }
+    }
+    loadFromSheet();
+
+    /* Botón Llamar: ahora sí marca el teléfono del local */
+    const _openRestaurantModal = openRestaurantModal;
+    openRestaurantModal = function (placeId) {
+        _openRestaurantModal(placeId);
+        if (activeRestaurant) {
+            document.getElementById("btnActionCall").href = "tel:" + String(activeRestaurant.phone).replace(/[^0-9+]/g, "");
+        }
+    };
+
+    /* ===== CARRUSEL DE BANNERS (pestaña Banners) ===== */
+    let BANNERS = [];
+    let BANNERS_PEQUENOS = [];
+    let smallIndex = 0, smallTimer = null;
+    let bannerIndex = 0, bannerTimer = null, touchX = null;
+    const esc = s => String(s || "").replace(/[<>"']/g, c => ({ "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    /* Banners de ejemplo: se muestran si la hoja no está conectada o no tiene banners activos.
+       Antes de vender espacios a alianzas reales, bórralos o cámbialos por los reales. */
+    const BANNERS_EJEMPLO = [
+        { activo: "SI", titulo: "SanLuis: Tour Ilusionista 2026", ubicacion: "Arriba", descripcion: "15 de noviembre · Entradas desde $35",
+          imagenurl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=80",
+          enlace: "https://tickets.vibraproductions.com/sanluis-puertoordaz-202611212000", aliado: "" },
+        { activo: "SI", titulo: "Rumba Retro: Noche de los 80 y 90", ubicacion: "Arriba", descripcion: "Sábado · Ejemplo de evento (banner de prueba)",
+          imagenurl: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?auto=format&fit=crop&w=1200&q=80",
+          enlace: "https://wa.me/584129413934", aliado: "" },
+        { activo: "SI", titulo: "Stand Up: Noche de Risas", ubicacion: "Arriba", descripcion: "Hotel Rosa Bela · Sábado 25 Oct · $10 entrada",
+          imagenurl: "https://images.unsplash.com/photo-1585699324551-f6c309eedeca?auto=format&fit=crop&w=1200&q=80",
+          enlace: "https://wa.me/584129413934", aliado: "" },
+        { activo: "SI", ubicacion: "Comida", titulo: "Hotel Rosa Bela · Ejemplo", descripcion: "Alojamiento en Puerto Ordaz · Reserva por WhatsApp",
+          imagenurl: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80",
+          enlace: "https://wa.me/584129413934", aliado: "Hotel Rosa Bela" },
+        { activo: "SI", ubicacion: "Comida", titulo: "Tu negocio aquí", descripcion: "Espacio publicitario · Contáctanos",
+          imagenurl: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=800&q=80",
+          enlace: "https://wa.me/584129413934", aliado: "" },
+        { activo: "SI", titulo: "Tu espacio aquí", ubicacion: "Arriba", descripcion: "Promociona tu negocio en Goordaz · Contáctanos",
+          imagenurl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=1200&q=80",
+          enlace: "https://wa.me/584129413934", aliado: "" }
+    ];
+
+    async function loadBanners() {
+        let lista = [];
+        try {
+            if (SHEET_ID.startsWith("PEGA")) throw new Error("hoja no configurada");
+            const r = await fetch(sheetUrl("Banners"));
+            if (!r.ok) throw new Error("No se pudo leer Banners");
+            const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
+            lista = parseCSV(await r.text()).filter(b => {
+                if (!isYes(b.activo) || !b.imagenurl) return false;
+                if (b.fechainicio && hoy < new Date(b.fechainicio)) return false;
+                if (b.fechafin && hoy > new Date(b.fechafin)) return false;
+                return true;
+            });
+        } catch (err) {
+            console.warn("[Goordaz] Banners desde la hoja no disponibles, se usan los de ejemplo:", err.message);
+        }
+        const base = lista.length ? lista : BANNERS_EJEMPLO;
+        BANNERS = base.filter(b => normKey(b.ubicacion) !== "comida");
+        BANNERS_PEQUENOS = base.filter(b => normKey(b.ubicacion) === "comida");
+        renderBanners();
+    }
+
+    function renderBanners() {
+        const box = document.getElementById("bannerCarousel");
+        if (!box) return;
+        if (BANNERS.length === 0) { box.classList.add("hidden"); return; }
+        box.classList.remove("hidden");
+        box.innerHTML = `
+            <div class="relative overflow-hidden rounded-3xl shadow-lg bg-slate-900 mb-3" id="bannerViewport">
+                <div id="bannerTrack" class="flex transition-transform duration-500 ease-out">
+                    ${BANNERS.map(b => `
+                        <a href="${esc(b.enlace) || '#'}" target="_blank" class="min-w-full relative min-h-[160px] md:min-h-[220px] block">
+                            <img src="${esc(b.imagenurl)}" alt="${esc(b.titulo)}" class="absolute inset-0 w-full h-full object-cover opacity-50">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent"></div>
+                            <div class="relative z-10 p-4 md:p-6 text-white min-h-[160px] md:min-h-[220px] flex flex-col justify-end gap-1">
+                                <span class="text-[9px] font-black uppercase bg-white/20 px-2 py-0.5 rounded-md w-fit">${b.aliado ? "Patrocinado" : "Destacado"}</span>
+                                <h2 class="text-lg md:text-2xl font-black leading-tight">${esc(b.titulo)}</h2>
+                                <p class="text-xs md:text-sm text-slate-200">${esc(b.descripcion)}</p>
+                            </div>
+                        </a>`).join("")}
+                </div>
+                <div id="bannerDots" class="absolute bottom-2 right-3 flex gap-1 z-20"></div>
+            </div>`;
+
+        const dots = document.getElementById("bannerDots");
+        if (BANNERS.length > 1) {
+            BANNERS.forEach((_, i) => {
+                const d = document.createElement("span");
+                d.onclick = (e) => { e.preventDefault(); showBanner(i); resetBannerTimer(); };
+                dots.appendChild(d);
+            });
+        }
+        const vp = document.getElementById("bannerViewport");
+        vp.addEventListener("touchstart", e => { touchX = e.touches[0].clientX; clearInterval(bannerTimer); }, { passive: true });
+        vp.addEventListener("touchend", e => {
+            if (touchX !== null) {
+                const dx = e.changedTouches[0].clientX - touchX;
+                if (Math.abs(dx) > 40) showBanner(bannerIndex + (dx < 0 ? 1 : -1));
+            }
+            touchX = null; resetBannerTimer();
+        });
+        showBanner(0);
+        resetBannerTimer();
+        renderSmallBanners();
+    }
+
+    /* Banner pequeño dentro de Comida y de la ficha del local */
+    function smallBannerHTML(b) {
+        return `<a href="${esc(b.enlace) || '#'}" target="_blank" class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl p-2 pr-3 shadow-sm">
+            <img src="${esc(b.imagenurl)}" alt="" class="w-14 h-14 rounded-xl object-cover shrink-0">
+            <div class="min-w-0 flex-1">
+                <span class="text-[8px] font-black uppercase text-slate-400">${b.aliado ? "Patrocinado" : "Anuncio"}</span>
+                <p class="text-xs font-extrabold text-slate-900 truncate">${esc(b.titulo)}</p>
+                <p class="text-[10px] text-slate-500 truncate">${esc(b.descripcion)}</p>
+            </div>
+            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        </a>`;
+    }
+
+    function renderSmallBanners() {
+        ["smallBannerFood", "smallBannerModal"].forEach(id => {
+            const box = document.getElementById(id);
+            if (!box) return;
+            if (BANNERS_PEQUENOS.length === 0) { box.classList.add("hidden"); box.innerHTML = ""; return; }
+            box.classList.remove("hidden");
+            box.innerHTML = smallBannerHTML(BANNERS_PEQUENOS[smallIndex % BANNERS_PEQUENOS.length]);
+        });
+        clearInterval(smallTimer);
+        if (BANNERS_PEQUENOS.length > 1) {
+            smallTimer = setInterval(() => {
+                smallIndex = (smallIndex + 1) % BANNERS_PEQUENOS.length;
+                renderSmallBanners();
+            }, 6000);
+        }
+    }
+
+    function showBanner(i) {
+        const n = BANNERS.length;
+        bannerIndex = (i + n) % n;
+        const track = document.getElementById("bannerTrack");
+        if (track) track.style.transform = `translateX(-${bannerIndex * 100}%)`;
+        document.querySelectorAll("#bannerDots span").forEach((d, k) => {
+            d.className = `h-1.5 rounded-full transition-all ${k === bannerIndex ? "w-4 bg-white" : "w-1.5 bg-white/40"}`;
+        });
+    }
+
+    function resetBannerTimer() {
+        clearInterval(bannerTimer);
+        if (BANNERS.length > 1) bannerTimer = setInterval(() => showBanner(bannerIndex + 1), 5000);
+    }
+
+    /* ===== REGISTRO DE PEDIDOS EN GOOGLE SHEETS ===== */
+    const ORDERS_URL = "PEGA_AQUI_LA_URL_DE_APPS_SCRIPT";
+
+    function logOrder(payload) {
+        if (!ORDERS_URL.startsWith("https")) return; // aún sin configurar: el pedido igual va por WhatsApp
+        try {
+            fetch(ORDERS_URL, {
+                method: "POST", mode: "no-cors",
+                headers: { "Content-Type": "text/plain" },
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {
+            console.error("[Goordaz] No se guardó el pedido:", e);
+        }
+    }
+
+    /* Arranque */
+    loadBanners();
+
     window.addEventListener("DOMContentLoaded", () => { 
         requestAccurateGPS();
         renderAllCarousels(); 
