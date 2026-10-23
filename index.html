@@ -604,6 +604,7 @@
         document.getElementById("infoInstagramLink").href = `https://instagram.com/${activeRestaurant.instagram.replace('@','')}`;
         document.getElementById("infoAddressText").innerText = activeRestaurant.locationText;
         document.getElementById("btnActionWhatsapp").href = `https://wa.me/${activeRestaurant.whatsapp}`;
+        document.getElementById("tabBtn-menu").innerText = activeRestaurant.etiqueta || "Menú";
         switchMainTab("menu"); setupMenuSubTabs();
         document.getElementById("restaurantModal").classList.remove("hidden");
     }
@@ -880,7 +881,7 @@
                 const gal = (l.galeriaurls || "").split(/\s*\|\s*|\s+/).filter(Boolean);
                 const img = l.fotoportadaurl || l.logourl || "";
                 return {
-                    id: l.id, alias: normKey(l.alias || l.id), type: TIPOS[normKey(l.tipo)] || "food", name: l.nombrecomercio,
+                    id: l.id, alias: normKey(l.alias || l.id), etiqueta: l.etiquetamenu || "Menú", type: TIPOS[normKey(l.tipo)] || "food", name: l.nombrecomercio,
                     categoryText: l.categoria, locationText: l.sectordireccion,
                     lat, lng, rating: toNum(l.reputaciongoogle) ?? "Nuevo", reviews: toNum(l.resenasgoogle) ?? 0,
                     image: img, logo: l.logourl || img, gallery: gal.length ? gal : [img],
